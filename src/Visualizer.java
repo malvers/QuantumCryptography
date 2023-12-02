@@ -21,10 +21,13 @@ public class Visualizer extends JButton {
     private ArrayList<Schema> allSchemasBob;
     private ArrayList<Bit> allBitsBob;
     private final int numBits = 60;
+    private final int offsetY = 80;
+    private BufferedImage alice;
+    private BufferedImage bob;
 
     public Visualizer() {
 
-        loadImage();
+        loadImages();
 
         addKeyListener(new KeyAdapter() {
             @Override
@@ -53,7 +56,6 @@ public class Visualizer extends JButton {
 
         Random random = new Random();
         double x = MyBox.width;
-        double offsetY = 80;
         double y = offsetY;
         double h = x;
 
@@ -75,6 +77,7 @@ public class Visualizer extends JButton {
         allTransmissions = new ArrayList<>();
 
         for (int i = 0; i < numBits; i++) {
+
             double xPos = x * i + offsetX;
             int theCase = -1;
             if (allBitsAlice.get(i).theBit == 1 && allSchemasAlice.get(i).filter == 0) {
@@ -109,9 +112,11 @@ public class Visualizer extends JButton {
         }
     }
 
-    private void loadImage() {
+    private void loadImages() {
         try {
             image = ImageIO.read(new File("universe.png"));
+            alice = ImageIO.read(new File("alice.png"));
+            bob = ImageIO.read(new File("bob.png"));
         } catch (IOException e) {
             System.out.println("clouds not found :-/");
         }
@@ -125,6 +130,9 @@ public class Visualizer extends JButton {
         g2d.setFont(new Font("Arial", Font.PLAIN, (int) (MyBox.width / 1.8)));
 
         drawImage(g2d);
+
+        g2d.drawImage(alice, 30, offsetY, alice.getWidth() / 16, alice.getHeight() / 16, null, this);
+        g2d.drawImage(bob, 30, 6 * offsetY, alice.getWidth() / 16, alice.getHeight() / 16, null, this);
 
         drawHighlighter(g2d);
 
