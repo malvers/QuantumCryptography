@@ -1,16 +1,26 @@
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.awt.event.WindowEvent;
+import java.awt.event.*;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Random;
 
 public class Visualizer extends JButton {
 
+    private static final int height = 800;
+    private static final int width = 1500;
+    private Rectangle2D.Double highlighter;
     private BufferedImage image;
+    private ArrayList<Bit> allBitsAlice;
+    private ArrayList<Schema> allSchemasAlice;
+    private ArrayList<Transmission> allTransmissions;
+    private ArrayList<Schema> allSchemasBob;
+    private ArrayList<Bit> allBitsBob;
+    private final int numBits = 60;
 
     public Visualizer() {
 
@@ -22,6 +32,81 @@ public class Visualizer extends JButton {
                 handleKeyPress(e);
             }
         });
+
+        addMouseMotionListener(new MouseMotionAdapter() {
+            @Override
+            public void mouseDragged(MouseEvent e) {
+                handleMouseDragged(e);
+            }
+
+            private void handleMouseDragged(MouseEvent e) {
+                super.mouseDragged(e);
+                highlighter.x = e.getX();
+                repaint();
+            }
+        });
+
+        createAll();
+    }
+
+    private void createAll() {
+
+        Random random = new Random();
+        double x = MyBox.width;
+        double offsetY = 80;
+        double y = offsetY;
+        double h = x;
+
+        highlighter = new Rectangle2D.Double(-100, offsetY, x, offsetY * 6 + MyBox.width);
+
+        double offsetX = 160;//(width - (numBits * x)) / 2.0;
+
+        allBitsAlice = new ArrayList<>();
+        for (int i = 0; i < numBits; i++) {
+            int bit = random.nextInt(2);
+            double xPos = x * i + offsetX;
+            allBitsAlice.add(new Bit(bit, xPos, y, x, h));
+        }
+        allSchemasAlice = new ArrayList<>();
+        for (int i = 0; i < numBits; i++) {
+            double xPos = x * i + offsetX;
+            allSchemasAlice.add(new Schema(random.nextInt(2), xPos, y + offsetY, x, h));
+        }
+        allTransmissions = new ArrayList<>();
+
+        for (int i = 0; i < numBits; i++) {
+            double xPos = x * i + offsetX;
+            int theCase = -1;
+            if (allBitsAlice.get(i).theBit == 1 && allSchemasAlice.get(i).filter == 0) {
+                theCase = 0;
+            } else if (allBitsAlice.get(i).theBit == 0 && allSchemasAlice.get(i).filter == 0) {
+                theCase = 1;
+            } else if (allBitsAlice.get(i).theBit == 0 && allSchemasAlice.get(i).filter == 1) {
+                theCase = 2;
+            } else if (allBitsAlice.get(i).theBit == 1 && allSchemasAlice.get(i).filter == 1) {
+                theCase = 3;
+            }
+            allTransmissions.add(new Transmission(theCase, xPos, y + 3 * offsetY, x, h));
+        }
+
+        allSchemasBob = new ArrayList<>();
+        for (int i = 0; i < numBits; i++) {
+            double xPos = x * i + offsetX;
+            allSchemasBob.add(new Schema(random.nextInt(2), xPos, 6 * offsetY, x, h));
+        }
+
+        allBitsBob = new ArrayList<>();
+        for (int i = 0; i < numBits; i++) {
+
+            int bit = -1;//random.nextInt(2);
+
+            if (allSchemasBob.get(i).filter == allSchemasAlice.get(i).filter) {
+                bit = allBitsAlice.get(i).theBit;
+            }
+
+            double xPos = x * i + offsetX;
+            allBitsBob.add(new Bit(bit, xPos, 7 * offsetY, x, h));
+        }
     }
 
     private void loadImage() {
@@ -36,10 +121,49 @@ public class Visualizer extends JButton {
     public void paint(Graphics g) {
 
         Graphics2D g2d = (Graphics2D) g;
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2d.setFont(new Font("Arial", Font.PLAIN, (int) (MyBox.width / 1.8)));
 
         drawImage(g2d);
 
-        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        drawHighlighter(g2d);
+
+        drawQuantumStuff(g2d);
+    }
+
+    private void drawHighlighter(Graphics2D g2d) {
+        g2d.setColor(Color.LIGHT_GRAY);
+
+        double factor = MyBox.width;
+        highlighter.x = Math.round(highlighter.x / factor) * factor + MyBox.width / 2.0 - 5;
+        g2d.fill(highlighter);
+    }
+
+    private void drawQuantumStuff(Graphics2D g2d) {
+
+        for (Bit b : allBitsAlice) {
+            b.draw(g2d);
+        }
+        for (Schema s : allSchemasAlice) {
+            s.draw(g2d);
+        }
+        for (Transmission t : allTransmissions) {
+            t.draw(g2d);
+        }
+
+        for (int i = 0; i < allSchemasBob.size(); i++) {
+            Schema s = allSchemasBob.get(i);
+            if (allSchemasAlice.get(i).filter == s.filter) {
+                s.setBackground(Color.BLACK);
+            } else {
+                s.setBackground(Color.GRAY);
+            }
+            allSchemasBob.get(i).draw(g2d);
+        }
+
+        for (Bit b : allBitsBob) {
+            b.draw(g2d);
+        }
     }
 
     private void drawImage(Graphics2D g2d) {
@@ -55,6 +179,7 @@ public class Visualizer extends JButton {
         switch (e.getKeyCode()) {
 
             case KeyEvent.VK_SPACE:
+                createAll();
                 break;
             case KeyEvent.VK_ENTER:
                 break;
@@ -78,6 +203,8 @@ public class Visualizer extends JButton {
             case KeyEvent.VK_T:
                 break;
             case KeyEvent.VK_ESCAPE:
+                highlighter.x = -100;
+                break;
             case KeyEvent.VK_W:
                 System.exit(0);
                 break;
@@ -86,7 +213,6 @@ public class Visualizer extends JButton {
 
     }
 
-
     public static void main(String[] args) {
 
         SwingUtilities.invokeLater(() -> {
@@ -94,7 +220,6 @@ public class Visualizer extends JButton {
             JFrame f = new JFrame();
             Visualizer v = new Visualizer();
             f.add(v);
-            int height = 800;
             f.addWindowListener(new java.awt.event.WindowAdapter() {
                 @Override
                 public void windowClosing(WindowEvent windowEvent) {
@@ -108,8 +233,8 @@ public class Visualizer extends JButton {
                     // Add your custom logic here
                 }
             });
-            f.setSize((int) (height * 1.618), height);
-            f.setLocation(500, 0);
+            f.setSize(width, height);
+            f.setLocation(200, 0);
             f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             f.setVisible(true);
         });
