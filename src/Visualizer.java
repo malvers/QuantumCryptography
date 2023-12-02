@@ -47,15 +47,7 @@ public class Visualizer extends JButton {
         if (image == null) {
             return;
         }
-//        float alpha = 0.10f; // Adjust this value between 0.0f (fully transparent) and 1.0f (fully opaque)
-//        AlphaComposite alphaComposite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha);
-//        g2d.setComposite(alphaComposite);
-
         g2d.drawImage(image, 0, 0, getWidth(), getHeight(), Color.BLACK, this);
-
-//        alpha = 1.0f; // Adjust this value between 0.0f (fully transparent) and 1.0f (fully opaque)
-//        alphaComposite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha);
-//        g2d.setComposite(alphaComposite);
     }
 
     private void handleKeyPress(KeyEvent e) {
