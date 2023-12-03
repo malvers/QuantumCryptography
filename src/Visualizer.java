@@ -25,6 +25,7 @@ public class Visualizer extends JButton {
     private BufferedImage alice;
     private BufferedImage bob;
     private BufferedImage eve;
+    private boolean drawEve = false;
 
     public Visualizer() {
 
@@ -152,8 +153,10 @@ public class Visualizer extends JButton {
 
     private void drawAliceBobEve(Graphics2D g2d) {
         g2d.drawImage(alice, 30, offsetY, alice.getWidth() / 16, alice.getHeight() / 16, null, this);
-        g2d.drawImage(eve, 30, 4 * offsetY, alice.getWidth() / 16, alice.getHeight() / 16, null, this);
         g2d.drawImage(bob, 30, 6 * offsetY, alice.getWidth() / 16, alice.getHeight() / 16, null, this);
+        if (drawEve) {
+            g2d.drawImage(eve, 30, 4 * offsetY, alice.getWidth() / 16, alice.getHeight() / 16, null, this);
+        }
     }
 
     private void drawHighlighter(Graphics2D g2d) {
@@ -176,8 +179,10 @@ public class Visualizer extends JButton {
             t.draw(g2d);
         }
 
-        for (Scheme b : allSchemesEve) {
-            b.draw(g2d);
+        if (drawEve) {
+            for (Scheme b : allSchemesEve) {
+                b.draw(g2d);
+            }
         }
 
 
@@ -223,6 +228,9 @@ public class Visualizer extends JButton {
 
             /// letter keys ////////////////////////////////////////////////////////////////////////////////////////////
             case KeyEvent.VK_D:
+                break;
+            case KeyEvent.VK_E:
+                drawEve = !drawEve;
                 break;
             case KeyEvent.VK_H:
                 break;

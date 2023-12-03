@@ -4,7 +4,7 @@ import java.awt.geom.AffineTransform;
 public class Scheme extends MyBox {
 
     protected int filter = -1;
-    private Color bg = Color.black;
+    private Color backGroundColor = Color.black;
 
     public Scheme(int filter, double x, double y, double w, double h) {
         super(x, y, w, h);
@@ -13,7 +13,7 @@ public class Scheme extends MyBox {
 
     protected void draw(Graphics2D g2d) {
 
-        g2d.setColor(bg);
+        g2d.setColor(backGroundColor);
         g2d.fill(this);
         g2d.setColor(Color.GRAY);
         g2d.draw(this);
@@ -25,7 +25,12 @@ public class Scheme extends MyBox {
         double oy;
 
         if (filter == 0) {
-            g2d.setColor(MyColors.myRed);
+
+            if (backGroundColor == Color.black) {
+                g2d.setColor(MyColors.myRed);
+            } else {
+                g2d.setColor(MyColors.myLightGray);
+            }
             facY = 1.4;
             facX = 6.0;
             ox = (width - (width / facX)) / 2;
@@ -43,7 +48,11 @@ public class Scheme extends MyBox {
             facY = 6.0;
             facX = 1.4;
 
-            g2d.setColor(MyColors.myGreen);
+            if (backGroundColor == Color.black) {
+                g2d.setColor(MyColors.myGreen);
+            } else {
+                g2d.setColor(MyColors.myLightGray);
+            }
             AffineTransform oldTransform = g2d.getTransform();
 
             AffineTransform rotation = new AffineTransform();
@@ -72,6 +81,6 @@ public class Scheme extends MyBox {
     }
 
     public void setBackground(Color color) {
-        bg = color;
+        backGroundColor = color;
     }
 }
