@@ -172,6 +172,10 @@ public class Visualizer extends JButton {
         for (Bit b : allBitsAlice) {
             b.draw(g2d);
         }
+        g2d.setColor(MyColors.mySandLikeColor);
+        String str = getPercentBitString(allBitsAlice);
+        g2d.drawString(str, (int) (allBitsAlice.size() * (MyBox.width + 3)), (int) (offsetY + MyBox.width - 4));
+
         for (Scheme s : allSchemesAlice) {
             s.draw(g2d);
         }
@@ -185,13 +189,12 @@ public class Visualizer extends JButton {
             }
         }
 
-
         for (int i = 0; i < allSchemesBob.size(); i++) {
             Scheme s = allSchemesBob.get(i);
             if (allSchemesAlice.get(i).filter == s.filter) {
-                s.setBackground(Color.BLACK);
+                s.setVilidity(true);
             } else {
-                s.setBackground(Color.GRAY);
+                s.setVilidity(false);
             }
             allSchemesBob.get(i).draw(g2d);
         }
@@ -199,6 +202,18 @@ public class Visualizer extends JButton {
         for (Bit b : allBitsBob) {
             b.draw(g2d);
         }
+    }
+
+    public String getPercentBitString(ArrayList<Bit> list) {
+
+        int count = 0;
+        for (Bit b : list) {
+            if (b.theBit == 1) {
+                count++;
+            }
+        }
+        int percent = (count * 100) / list.size();
+        return percent + " % ";
     }
 
     private void drawBackgroundImage(Graphics2D g2d) {

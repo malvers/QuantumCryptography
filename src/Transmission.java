@@ -12,9 +12,11 @@ public class Transmission extends MyBox {
 
     protected void draw(Graphics2D g2d) {
 
-        g2d.setColor(Color.DARK_GRAY);
+        Color color = g2d.getColor();
+
+        g2d.setColor(MyColors.myGray);
         g2d.fill(this);
-        g2d.setColor(Color.GRAY);
+        g2d.setColor(Color.LIGHT_GRAY);
         g2d.draw(this);
 
         g2d.setColor(MyColors.myRed);
@@ -64,7 +66,7 @@ public class Transmission extends MyBox {
             facY = 6.0;
             facX = 1.4;
 
-            g2d.setColor(MyColors.myBlue);
+            g2d.setColor(MyColors.myCyan);
             AffineTransform oldTransform = g2d.getTransform();
 
             AffineTransform rotation = new AffineTransform();
@@ -77,5 +79,6 @@ public class Transmission extends MyBox {
 
             g2d.setTransform(oldTransform);
         }
+        g2d.setColor(color);
     }
 }

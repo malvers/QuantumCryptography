@@ -3,8 +3,9 @@ import java.awt.geom.AffineTransform;
 
 public class Scheme extends MyBox {
 
-    protected int filter = -1;
-    private Color backGroundColor = Color.black;
+    protected int filter;
+    private Color backGroundColor = MyColors.myDarkGray;
+    private boolean valide = true;
 
     public Scheme(int filter, double x, double y, double w, double h) {
         super(x, y, w, h);
@@ -24,19 +25,18 @@ public class Scheme extends MyBox {
         double ox;
         double oy;
 
+        facY = 1.4;
+        facX = 6.0;
         if (filter == 0) {
 
-            if (backGroundColor == Color.black) {
+            if (valide) {
                 g2d.setColor(MyColors.myRed);
             } else {
-                g2d.setColor(MyColors.myLightGray);
+                g2d.setColor(MyColors.myGray);
             }
-            facY = 1.4;
-            facX = 6.0;
             ox = (width - (width / facX)) / 2;
             oy = (height - (height / facY)) / 2;
             g2d.fill(new Double(x + ox, y + oy, width / facX, height / facY));
-            /// g2d.setColor(MyColors.myGreen);
             facY = 6.0;
             facX = 1.4;
             ox = (width - (width / facX)) / 2;
@@ -45,13 +45,10 @@ public class Scheme extends MyBox {
 
         } else {
 
-            facY = 6.0;
-            facX = 1.4;
-
-            if (backGroundColor == Color.black) {
+            if (valide) {
                 g2d.setColor(MyColors.myGreen);
             } else {
-                g2d.setColor(MyColors.myLightGray);
+                g2d.setColor(MyColors.myGray);
             }
             AffineTransform oldTransform = g2d.getTransform();
 
@@ -65,7 +62,6 @@ public class Scheme extends MyBox {
 
             g2d.setTransform(oldTransform);
 
-            /// g2d.setColor(MyColors.myBlue);
             oldTransform = g2d.getTransform();
 
             rotation = new AffineTransform();
@@ -80,7 +76,7 @@ public class Scheme extends MyBox {
         }
     }
 
-    public void setBackground(Color color) {
-        backGroundColor = color;
+    public void setVilidity(boolean v) {
+       valide = v;
     }
 }
