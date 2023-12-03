@@ -1,12 +1,12 @@
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 
-public class Schema extends MyBox {
+public class Scheme extends MyBox {
 
     protected int filter = -1;
     private Color bg = Color.black;
 
-    public Schema(int filter, double x, double y, double w, double h) {
+    public Scheme(int filter, double x, double y, double w, double h) {
         super(x, y, w, h);
         this.filter = filter;
     }
