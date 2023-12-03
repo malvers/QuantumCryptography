@@ -25,8 +25,10 @@ public class Visualizer extends JButton {
     private BufferedImage alice;
     private BufferedImage bob;
     private BufferedImage eve;
-    private final boolean drawEve = false;
-    private int offsetX;
+    private boolean drawEve = false;
+    private int offsetX = 160;
+    private double boxWidth;
+    private int numBits = 24;
 
     public Visualizer() {
 
@@ -58,16 +60,20 @@ public class Visualizer extends JButton {
     private void createAll() {
 
         Random random = new Random();
-        double x = MyBox.width;
+
+        boxWidth = 1500.0 / numBits;
+        if (boxWidth > 36) {
+            boxWidth = 36;
+        }
+//        System.out.println("boxWidth: " + boxWidth);
+
+        double x = boxWidth;
         double y = offsetY;
 
-        highlighter = new Rectangle2D.Double(-100, offsetY, x, offsetY * 6 + MyBox.width);
-
-        offsetX = 160;
+        highlighter = new Rectangle2D.Double(-100, offsetY, x, offsetY * 6 + boxWidth);
 
         /// create Alice's random bit-string ///////////////////////////////////////////////////////////////////////////
         allBitsAlice = new ArrayList<>();
-        int numBits = 64;
         for (int i = 0; i < numBits; i++) {
             int bit = random.nextInt(2);
             double xPos = x * i + offsetX;
@@ -141,18 +147,29 @@ public class Visualizer extends JButton {
 
         Graphics2D g2d = (Graphics2D) g;
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        g2d.setFont(new Font("Arial", Font.PLAIN, (int) (MyBox.width / 1.8)));
 
         drawBackgroundImage(g2d);
+
+        /// draw after here :-) ////////////////////////////////////////////////////////////////////////////////////////
+        g2d.setColor(MyColors.myOrange);
+        g2d.setFont(new Font("Arial", Font.PLAIN, 14));
+        g2d.drawString("Number of bits: " + numBits, offsetX, 40);
+
+        g2d.setFont(new Font("Arial", Font.PLAIN, (int) (boxWidth / 1.8)));
+
 
         drawAliceBobEve(g2d);
 
         drawHighlighter(g2d);
 
         drawPhotonStuff(g2d);
+
+        drawHeaders(g2d);
+
     }
 
     private void drawAliceBobEve(Graphics2D g2d) {
+
         g2d.drawImage(alice, 30, offsetY, alice.getWidth() / 16, alice.getHeight() / 16, null, this);
         g2d.drawImage(bob, 30, 6 * offsetY, alice.getWidth() / 16, alice.getHeight() / 16, null, this);
         if (drawEve) {
@@ -164,52 +181,57 @@ public class Visualizer extends JButton {
 
         g2d.setColor(Color.WHITE);
 
-        highlighter.x = Math.round(highlighter.x / MyBox.width) * MyBox.width + MyBox.width / 2.0 - 5;
+        highlighter.x = Math.round(highlighter.x / boxWidth) * boxWidth + boxWidth / 2.0 - 5;
         g2d.fill(highlighter);
     }
 
     private void drawPhotonStuff(Graphics2D g2d) {
 
-        int upShiftHeader = 6;
         for (Bit b : allBitsAlice) {
             b.draw(g2d);
         }
-        g2d.setColor(MyColors.mySandLikeColor);
-        String str = getPercentBitString(allBitsAlice);
-        g2d.drawString("Alice's random bit-string - " + str, offsetX, offsetY - upShiftHeader);
-
         for (Scheme s : allSchemesAlice) {
             s.draw(g2d);
         }
-        g2d.setColor(MyColors.mySandLikeColor);
-        str = getPercentSchemes(allSchemesAlice);
-        g2d.drawString("Alice's schemes - " + str, offsetX, 2 * offsetY - upShiftHeader);
-
         for (Transmission t : allTransmissions) {
             t.draw(g2d);
         }
-
         if (drawEve) {
             for (Scheme b : allSchemesEve) {
                 b.draw(g2d);
             }
         }
-
         for (int i = 0; i < allSchemesBob.size(); i++) {
             Scheme s = allSchemesBob.get(i);
             s.setValidity(allSchemesAlice.get(i).filter == s.filter);
             allSchemesBob.get(i).draw(g2d);
         }
-        g2d.setColor(MyColors.mySandLikeColor);
-        str = getPercentSchemes(allSchemesBob);
-        g2d.drawString("Bob's schemes - " + str, offsetX, 6 * offsetY - upShiftHeader);
 
         for (Bit b : allBitsBob) {
             b.draw(g2d);
         }
+    }
+
+    private void drawHeaders(Graphics2D g2d) {
+
+        int upShiftHeader = 6;
+        g2d.setFont(new Font("Arial", Font.PLAIN, 14));
+        String str;
         g2d.setColor(MyColors.mySandLikeColor);
         str = getPercentBitString(allBitsBob);
         g2d.drawString("Bob's bit-string - " + str, offsetX, 7 * offsetY - upShiftHeader);
+
+        g2d.setColor(MyColors.mySandLikeColor);
+        str = getPercentSchemes(allSchemesAlice);
+        g2d.drawString("Alice's schemes - " + str, offsetX, 2 * offsetY - upShiftHeader);
+
+        g2d.setColor(MyColors.mySandLikeColor);
+        str = getPercentSchemes(allSchemesBob);
+        g2d.drawString("Bob's schemes - " + str, offsetX, 6 * offsetY - upShiftHeader);
+
+        g2d.setColor(MyColors.mySandLikeColor);
+        str = getPercentBitString(allBitsAlice);
+        g2d.drawString("Alice's random bit-string - " + str, offsetX, offsetY - upShiftHeader);
     }
 
     public String getPercentSchemes(ArrayList<Scheme> list) {
@@ -272,35 +294,57 @@ public class Visualizer extends JButton {
 
     private void handleKeyPress(KeyEvent e) {
 
+//        System.out.println("code: " + e.getKeyCode());
+
         switch (e.getKeyCode()) {
 
             case KeyEvent.VK_SPACE:
                 createAll();
                 break;
-//            case KeyEvent.VK_ENTER:
-//                break;
-//            case KeyEvent.VK_UP:
-//                break;
-//            case KeyEvent.VK_DOWN:
-//                break;
-//            case KeyEvent.VK_LEFT:
-//            case KeyEvent.VK_RIGHT:
-//                break;
+            case KeyEvent.VK_UP:
+                numBits += 2;
+                if (numBits > 128) {
+                    numBits = 128;
+                } else {
+                    createAll();
+                }
+                break;
+            case KeyEvent.VK_DOWN:
+                numBits -= 2;
+                if (numBits < 10) {
+                    numBits = 10;
+                } else {
+                    createAll();
+                }
+                break;
+            case KeyEvent.VK_ENTER:
+                break;
+            case KeyEvent.VK_LEFT:
+            case KeyEvent.VK_RIGHT:
+                break;
 
             /// letter keys ////////////////////////////////////////////////////////////////////////////////////////////
-//            case KeyEvent.VK_D:
-//                break;
-//            case KeyEvent.VK_E:
-//                drawEve = !drawEve;
-//                break;
-//            case KeyEvent.VK_H:
-//                break;
-//            case KeyEvent.VK_I:
-//                break;
-//            case KeyEvent.VK_P:
-//                break;
-//            case KeyEvent.VK_T:
-//                break;
+            case KeyEvent.VK_D:
+                break;
+            case KeyEvent.VK_E:
+                drawEve = !drawEve;
+                break;
+            case KeyEvent.VK_H:
+                break;
+            case KeyEvent.VK_I:
+                break;
+            case KeyEvent.VK_M:
+                if (e.isShiftDown()) {
+                    numBits = 256;
+                } else {
+                    numBits = 4;
+                }
+                createAll();
+                break;
+            case KeyEvent.VK_P:
+                break;
+            case KeyEvent.VK_T:
+                break;
             case KeyEvent.VK_ESCAPE:
                 highlighter.x = -100;
                 break;
