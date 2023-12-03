@@ -25,7 +25,7 @@ public class Visualizer extends JButton {
     private BufferedImage alice;
     private BufferedImage bob;
     private BufferedImage eve;
-    private boolean drawEve = false;
+    private final boolean drawEve = false;
     private int offsetX;
 
     public Visualizer() {
@@ -181,6 +181,10 @@ public class Visualizer extends JButton {
         for (Scheme s : allSchemesAlice) {
             s.draw(g2d);
         }
+        g2d.setColor(MyColors.mySandLikeColor);
+        str = getPercentSchemes(allSchemesAlice);
+        g2d.drawString("Alice's schemes - " + str, offsetX, 2 * offsetY - upShiftHeader);
+
         for (Transmission t : allTransmissions) {
             t.draw(g2d);
         }
@@ -193,13 +197,12 @@ public class Visualizer extends JButton {
 
         for (int i = 0; i < allSchemesBob.size(); i++) {
             Scheme s = allSchemesBob.get(i);
-            if (allSchemesAlice.get(i).filter == s.filter) {
-                s.setVilidity(true);
-            } else {
-                s.setVilidity(false);
-            }
+            s.setValidity(allSchemesAlice.get(i).filter == s.filter);
             allSchemesBob.get(i).draw(g2d);
         }
+        g2d.setColor(MyColors.mySandLikeColor);
+        str = getPercentSchemes(allSchemesBob);
+        g2d.drawString("Bob's schemes - " + str, offsetX, 6 * offsetY - upShiftHeader);
 
         for (Bit b : allBitsBob) {
             b.draw(g2d);
@@ -207,6 +210,31 @@ public class Visualizer extends JButton {
         g2d.setColor(MyColors.mySandLikeColor);
         str = getPercentBitString(allBitsBob);
         g2d.drawString("Bob's bit-string - " + str, offsetX, 7 * offsetY - upShiftHeader);
+    }
+
+    public String getPercentSchemes(ArrayList<Scheme> list) {
+
+        int count0 = 0;
+        int count1 = 0;
+        int countArbitrary = 0;
+        for (Scheme b : list) {
+            if (b.filter == 1) {
+                count1++;
+            } else if (b.valide == false) {
+                countArbitrary++;
+            } else if (b.filter == 0) {
+                count0++;
+            }
+        }
+        int percent1 = (count1 * 100) / list.size();
+        int percent0 = (count0 * 100) / list.size();
+        String str = percent1 + " % '+' - " + (100 - percent1) + " % 'x'";
+
+        if (countArbitrary > 0) {
+            str += " - may be wrong " + (100 - percent1 - percent0) + " %";
+        }
+
+        return str;
     }
 
     public String getPercentBitString(ArrayList<Bit> list) {
@@ -225,7 +253,7 @@ public class Visualizer extends JButton {
         }
         int percent1 = (count1 * 100) / list.size();
         int percent0 = (count0 * 100) / list.size();
-        String str = percent1 + " % '1' | " + percent0 + " % '0'";
+        String str = percent1 + " % '1' - " + percent0 + " % '0'";
 
         if (countArbitrary > 0) {
             str += " - may be wrong " + (100 - percent1 - percent0) + " %";
@@ -249,30 +277,30 @@ public class Visualizer extends JButton {
             case KeyEvent.VK_SPACE:
                 createAll();
                 break;
-            case KeyEvent.VK_ENTER:
-                break;
-            case KeyEvent.VK_UP:
-                break;
-            case KeyEvent.VK_DOWN:
-                break;
-            case KeyEvent.VK_LEFT:
-            case KeyEvent.VK_RIGHT:
-                break;
+//            case KeyEvent.VK_ENTER:
+//                break;
+//            case KeyEvent.VK_UP:
+//                break;
+//            case KeyEvent.VK_DOWN:
+//                break;
+//            case KeyEvent.VK_LEFT:
+//            case KeyEvent.VK_RIGHT:
+//                break;
 
             /// letter keys ////////////////////////////////////////////////////////////////////////////////////////////
-            case KeyEvent.VK_D:
-                break;
-            case KeyEvent.VK_E:
-                drawEve = !drawEve;
-                break;
-            case KeyEvent.VK_H:
-                break;
-            case KeyEvent.VK_I:
-                break;
-            case KeyEvent.VK_P:
-                break;
-            case KeyEvent.VK_T:
-                break;
+//            case KeyEvent.VK_D:
+//                break;
+//            case KeyEvent.VK_E:
+//                drawEve = !drawEve;
+//                break;
+//            case KeyEvent.VK_H:
+//                break;
+//            case KeyEvent.VK_I:
+//                break;
+//            case KeyEvent.VK_P:
+//                break;
+//            case KeyEvent.VK_T:
+//                break;
             case KeyEvent.VK_ESCAPE:
                 highlighter.x = -100;
                 break;

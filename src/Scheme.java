@@ -4,8 +4,8 @@ import java.awt.geom.AffineTransform;
 public class Scheme extends MyBox {
 
     protected int filter;
-    private Color backGroundColor = MyColors.myDarkGray;
-    private boolean valide = true;
+    private final Color backGroundColor = MyColors.myDarkGray;
+    protected boolean valide = true;
 
     public Scheme(int filter, double x, double y, double w, double h) {
         super(x, y, w, h);
@@ -76,7 +76,7 @@ public class Scheme extends MyBox {
         }
     }
 
-    public void setVilidity(boolean v) {
+    public void setValidity(boolean v) {
        valide = v;
     }
 }
