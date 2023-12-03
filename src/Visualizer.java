@@ -10,20 +10,20 @@ import java.util.ArrayList;
 import java.util.Random;
 
 public class Visualizer extends JButton {
-
-    private static final int height = 800;
-    private static final int width = 1700;
+    private static final int windowHeight = 800;
+    private static final int windowWidth = 1700;
     private Rectangle2D.Double highlighter;
     private BufferedImage image;
     private ArrayList<Bit> allBitsAlice;
     private ArrayList<Scheme> allSchemesAlice;
-    private ArrayList<Transmission> allTransmissions;
+    private ArrayList<Transmission> alicesTransmissions;
+    private ArrayList<Transmission> evesTransmissions;
     private ArrayList<Scheme> allSchemesBob;
     private ArrayList<Scheme> allSchemesEve;
     private ArrayList<Bit> allBitsBob;
     private ArrayList<Bit> allBitsEve;
     private final int offsetX = 140;
-    private final int offsetY = height / 8;
+    private final int offsetY = windowHeight / 9;
     private BufferedImage alice;
     private BufferedImage bob;
     private BufferedImage eve;
@@ -86,11 +86,11 @@ public class Visualizer extends JButton {
         allSchemesAlice = new ArrayList<>();
         for (int i = 0; i < numBits; i++) {
             double xPos = x * i + offsetX;
-            allSchemesAlice.add(new Scheme(random.nextInt(2), xPos, y + offsetY, x, x));
+            allSchemesAlice.add(new Scheme(random.nextInt(2), xPos, 2 * offsetY, x, x));
         }
 
-        /// create transmissions ///////////////////////////////////////////////////////////////////////////////////////
-        allTransmissions = new ArrayList<>();
+        /// create Alice's transmissions ///////////////////////////////////////////////////////////////////////////////
+        alicesTransmissions = new ArrayList<>();
         for (int i = 0; i < numBits; i++) {
 
             double xPos = x * i + offsetX;
@@ -104,7 +104,7 @@ public class Visualizer extends JButton {
             } else if (allBitsAlice.get(i).theBit == 1 && allSchemesAlice.get(i).filter == 1) {
                 theCase = 3;
             }
-            allTransmissions.add(new Transmission(theCase, xPos, y + 2 * offsetY, x, x));
+            alicesTransmissions.add(new Transmission(theCase, xPos, 3 * offsetY, x, x));
         }
 
         /// create Eve's schemes ///////////////////////////////////////////////////////////////////////////////////////
@@ -125,11 +125,29 @@ public class Visualizer extends JButton {
             allBitsEve.add(new Bit(bit, xPos, 5 * offsetY, x, x));
         }
 
-        /// create Bob's es ///////////////////////////////////////////////////////////////////////////////////////
+        /// create Eve's transmissions /////////////////////////////////////////////////////////////////////////////////
+        evesTransmissions = new ArrayList<>();
+        for (int i = 0; i < numBits; i++) {
+
+            double xPos = x * i + offsetX;
+            int theCase = -1;
+            if (allBitsEve.get(i).theBit == 1 && allSchemesAlice.get(i).filter == 0) {
+                theCase = 0;
+            } else if (allBitsEve.get(i).theBit == 0 && allSchemesAlice.get(i).filter == 0) {
+                theCase = 1;
+            } else if (allBitsEve.get(i).theBit == 0 && allSchemesAlice.get(i).filter == 1) {
+                theCase = 2;
+            } else if (allBitsEve.get(i).theBit == 1 && allSchemesAlice.get(i).filter == 1) {
+                theCase = 3;
+            }
+            evesTransmissions.add(new Transmission(theCase, xPos, 6 * offsetY, x, x));
+        }
+
+        /// create Bob's schemes ///////////////////////////////////////////////////////////////////////////////////////
         allSchemesBob = new ArrayList<>();
         for (int i = 0; i < numBits; i++) {
             double xPos = x * i + offsetX;
-            allSchemesBob.add(new Scheme(random.nextInt(2), xPos, 6 * offsetY, x, x));
+            allSchemesBob.add(new Scheme(random.nextInt(2), xPos, 7 * offsetY, x, x));
         }
 
         /// create Bob's bit-string ////////////////////////////////////////////////////////////////////////////////////
@@ -140,7 +158,7 @@ public class Visualizer extends JButton {
                 bit = allBitsAlice.get(i).theBit;
             }
             double xPos = x * i + offsetX;
-            allBitsBob.add(new Bit(bit, xPos, 7 * offsetY, x, x));
+            allBitsBob.add(new Bit(bit, xPos, 8 * offsetY, x, x));
         }
     }
 
@@ -189,10 +207,10 @@ public class Visualizer extends JButton {
 
     private void drawAliceBobEve(Graphics2D g2d) {
 
-        g2d.drawImage(alice, 30, offsetY, alice.getWidth() / 16, alice.getHeight() / 16, null, this);
-        g2d.drawImage(bob, 30, 6 * offsetY, alice.getWidth() / 16, alice.getHeight() / 16, null, this);
+        g2d.drawImage(alice, 30, (int) (1.7 * offsetY), alice.getWidth() / 16, alice.getHeight() / 16, null, this);
+        g2d.drawImage(bob, 30, (int) (7.1 * offsetY), alice.getWidth() / 16, alice.getHeight() / 16, null, this);
         if (drawEve) {
-            g2d.drawImage(eve, 30, 4 * offsetY, alice.getWidth() / 16, alice.getHeight() / 16, null, this);
+            g2d.drawImage(eve, 30, (int) (4.7 * offsetY), alice.getWidth() / 16, alice.getHeight() / 16, null, this);
         }
     }
 
@@ -215,17 +233,24 @@ public class Visualizer extends JButton {
         for (Scheme s : allSchemesAlice) {
             s.draw(g2d);
         }
-        for (Transmission t : allTransmissions) {
+        for (Transmission t : alicesTransmissions) {
             t.draw(g2d);
         }
         if (drawEve) {
-            for (Scheme b : allSchemesEve) {
-                b.draw(g2d);
+
+            for (int i = 0; i < allSchemesEve.size(); i++) {
+                Scheme s = allSchemesEve.get(i);
+                s.setValidity(allSchemesAlice.get(i).filter == s.filter);
+                allSchemesEve.get(i).draw(g2d);
             }
             for (Bit b : allBitsEve) {
                 b.draw(g2d);
             }
+            for (Transmission t : evesTransmissions) {
+                t.draw(g2d);
+            }
         }
+
         for (int i = 0; i < allSchemesBob.size(); i++) {
             Scheme s = allSchemesBob.get(i);
             s.setValidity(allSchemesAlice.get(i).filter == s.filter);
@@ -241,22 +266,18 @@ public class Visualizer extends JButton {
 
         int upShiftHeader = 6;
         g2d.setFont(new Font("Arial", Font.PLAIN, 14));
-        String str;
         g2d.setColor(MyColors.mySandLikeColor);
-        str = getPercentBitString(allBitsBob);
-        g2d.drawString("Bob's bit-string - " + str, offsetX, 7 * offsetY - upShiftHeader);
 
-        g2d.setColor(MyColors.mySandLikeColor);
+        String str;
+
         str = getPercentSchemes(allSchemesAlice);
         g2d.drawString("Alice's schemes - " + str, offsetX, 2 * offsetY - upShiftHeader);
-
-        g2d.setColor(MyColors.mySandLikeColor);
         str = getPercentSchemes(allSchemesBob);
-        g2d.drawString("Bob's schemes - " + str, offsetX, 6 * offsetY - upShiftHeader);
-
-        g2d.setColor(MyColors.mySandLikeColor);
+        g2d.drawString("Bob's schemes - " + str, offsetX, 7 * offsetY - upShiftHeader);
         str = getPercentBitString(allBitsAlice);
         g2d.drawString("Alice's random bit-string - " + str, offsetX, offsetY - upShiftHeader);
+        str = getPercentBitString(allBitsBob);
+        g2d.drawString("Bob's bit-string - " + str, offsetX, 8 * offsetY - upShiftHeader);
     }
 
     public String getPercentSchemes(ArrayList<Scheme> list) {
@@ -416,7 +437,7 @@ public class Visualizer extends JButton {
                     // Add your custom logic here
                 }
             });
-            f.setSize(width, height);
+            f.setSize(windowWidth, windowHeight);
             f.setLocation(0, 0);
             f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             f.setVisible(true);

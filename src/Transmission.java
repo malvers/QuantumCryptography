@@ -3,7 +3,7 @@ import java.awt.geom.AffineTransform;
 
 public class Transmission extends MyBox {
 
-    private final int transmission;
+    protected final int transmission;
 
     public Transmission(int theCase, double x, double y, double w, double h) {
         super(x, y, w, h);
