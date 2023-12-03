@@ -27,7 +27,7 @@ public class Visualizer extends JButton {
     private BufferedImage alice;
     private BufferedImage bob;
     private BufferedImage eve;
-    private boolean drawEve = false;
+    private boolean eavsdropping = false;
     private double boxWidth;
     private int numBits = 42;
 
@@ -72,7 +72,7 @@ public class Visualizer extends JButton {
         double x = boxWidth;
         double y = offsetY;
 
-        highlighter = new Rectangle2D.Double(-100, offsetY, x, offsetY * 6 + boxWidth);
+        highlighter = new Rectangle2D.Double(-100, offsetY, x, offsetY * 7 + boxWidth);
 
         /// create Alice's random bit-string ///////////////////////////////////////////////////////////////////////////
         allBitsAlice = new ArrayList<>();
@@ -207,10 +207,15 @@ public class Visualizer extends JButton {
 
     private void drawAliceBobEve(Graphics2D g2d) {
 
-        g2d.drawImage(alice, 30, (int) (1.7 * offsetY), alice.getWidth() / 16, alice.getHeight() / 16, null, this);
-        g2d.drawImage(bob, 30, (int) (7.1 * offsetY), alice.getWidth() / 16, alice.getHeight() / 16, null, this);
-        if (drawEve) {
+        int indent = 30;
+        g2d.setColor(MyColors.mySandLikeColor);
+        g2d.drawImage(alice, indent, (int) (1.7 * offsetY), alice.getWidth() / 16, alice.getHeight() / 16, null, this);
+        g2d.drawString("Alice", indent + 10, 3 * offsetY);
+        g2d.drawImage(bob, indent, (int) (7.1 * offsetY), alice.getWidth() / 16, alice.getHeight() / 16, null, this);
+        g2d.drawString("Bob", indent + 14, (int) (8.38 * offsetY));
+        if (eavsdropping) {
             g2d.drawImage(eve, 30, (int) (4.7 * offsetY), alice.getWidth() / 16, alice.getHeight() / 16, null, this);
+            g2d.drawString("Eve", indent + 14, 6 * offsetY);
         }
     }
 
@@ -236,7 +241,10 @@ public class Visualizer extends JButton {
         for (Transmission t : alicesTransmissions) {
             t.draw(g2d);
         }
-        if (drawEve) {
+        if (eavsdropping) {
+
+            g2d.setColor(MyColors.mySandLikeColor);
+            g2d.draw(new Rectangle2D.Double(10, 4 * offsetY - 10, getWidth() - 20, 2.64 * offsetY));
 
             for (int i = 0; i < allSchemesEve.size(); i++) {
                 Scheme s = allSchemesEve.get(i);
@@ -379,7 +387,7 @@ public class Visualizer extends JButton {
             case KeyEvent.VK_D:
                 break;
             case KeyEvent.VK_E:
-                drawEve = !drawEve;
+                eavsdropping = !eavsdropping;
                 break;
             case KeyEvent.VK_H:
                 break;
@@ -424,6 +432,7 @@ public class Visualizer extends JButton {
             JFrame f = new JFrame();
             Visualizer v = new Visualizer();
             f.add(v);
+            f.setTitle("BB 84 - Bennett-Brassard 1984");
             f.addWindowListener(new java.awt.event.WindowAdapter() {
                 @Override
                 public void windowClosing(WindowEvent windowEvent) {
