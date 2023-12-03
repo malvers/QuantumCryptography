@@ -11,7 +11,7 @@ import java.util.Random;
 
 public class Visualizer extends JButton {
 
-    private static final int height = 800;
+    private static final int height = 666;
     private static final int width = 1700;
     private Rectangle2D.Double highlighter;
     private BufferedImage image;
@@ -21,14 +21,14 @@ public class Visualizer extends JButton {
     private ArrayList<Scheme> allSchemesBob;
     private ArrayList<Scheme> allSchemesEve;
     private ArrayList<Bit> allBitsBob;
-    private final int offsetY = 80;
+    private final int offsetX = 140;
+    private final int offsetY = height / 8;
     private BufferedImage alice;
     private BufferedImage bob;
     private BufferedImage eve;
     private boolean drawEve = false;
-    private int offsetX = 160;
     private double boxWidth;
-    private int numBits = 24;
+    private int numBits = 42;
 
     public Visualizer() {
 
@@ -147,16 +147,13 @@ public class Visualizer extends JButton {
 
         Graphics2D g2d = (Graphics2D) g;
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
         drawBackgroundImage(g2d);
 
         /// draw after here :-) ////////////////////////////////////////////////////////////////////////////////////////
-        g2d.setColor(MyColors.myOrange);
-        g2d.setFont(new Font("Arial", Font.PLAIN, 14));
-        g2d.drawString("Number of bits: " + numBits, offsetX, 40);
+
+        drawNumberOfBits(g2d);
 
         g2d.setFont(new Font("Arial", Font.PLAIN, (int) (boxWidth / 1.8)));
-
 
         drawAliceBobEve(g2d);
 
@@ -165,7 +162,13 @@ public class Visualizer extends JButton {
         drawPhotonStuff(g2d);
 
         drawHeaders(g2d);
+    }
 
+    private void drawNumberOfBits(Graphics2D g2d) {
+
+        g2d.setColor(MyColors.myOrange);
+        g2d.setFont(new Font("Arial", Font.PLAIN, 14));
+        g2d.drawString("Number of bits: " + numBits, offsetX, 40);
     }
 
     private void drawAliceBobEve(Graphics2D g2d) {
@@ -323,6 +326,11 @@ public class Visualizer extends JButton {
             case KeyEvent.VK_RIGHT:
                 break;
 
+            /// letter keys ////////////////////////////////////////////////////////////////////////////////////////////
+            case KeyEvent.VK_4:
+                numBits = 42;
+                createAll();
+                break;
             /// letter keys ////////////////////////////////////////////////////////////////////////////////////////////
             case KeyEvent.VK_D:
                 break;

@@ -37,7 +37,14 @@ public class Bit extends MyBox {
             g2d.setColor(Color.WHITE);
             g2d.fill(this);
             g2d.setColor(Color.DARK_GRAY);
-            g2d.drawString("" + theBit, (int) x + 8, (int) (y + height - 6));
+            String str;
+            str = "" + theBit;
+            int ws = g2d.getFontMetrics().stringWidth(str);
+            int hs = g2d.getFontMetrics().getHeight();
+            System.out.println("hs: " + hs);
+            int posX = (int) (x + ((width - ws) / 2.0));
+            int posY = (int) (y + ((height - hs) / 2.0) + height/2.0 + 1);
+            g2d.drawString(str, posX, posY);
         }
     }
 }
