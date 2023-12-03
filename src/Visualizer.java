@@ -26,6 +26,7 @@ public class Visualizer extends JButton {
     private BufferedImage bob;
     private BufferedImage eve;
     private boolean drawEve = false;
+    private int offsetX;
 
     public Visualizer() {
 
@@ -62,7 +63,7 @@ public class Visualizer extends JButton {
 
         highlighter = new Rectangle2D.Double(-100, offsetY, x, offsetY * 6 + MyBox.width);
 
-        double offsetX = 160;
+        offsetX = 160;
 
         /// create Alice's random bit-string ///////////////////////////////////////////////////////////////////////////
         allBitsAlice = new ArrayList<>();
@@ -169,12 +170,13 @@ public class Visualizer extends JButton {
 
     private void drawPhotonStuff(Graphics2D g2d) {
 
+        int upShiftHeader = 6;
         for (Bit b : allBitsAlice) {
             b.draw(g2d);
         }
         g2d.setColor(MyColors.mySandLikeColor);
         String str = getPercentBitString(allBitsAlice);
-        g2d.drawString(str, (int) (allBitsAlice.size() * (MyBox.width + 3)), (int) (offsetY + MyBox.width - 4));
+        g2d.drawString("Alice's random bit-string - " + str, offsetX, offsetY - upShiftHeader);
 
         for (Scheme s : allSchemesAlice) {
             s.draw(g2d);
@@ -202,18 +204,34 @@ public class Visualizer extends JButton {
         for (Bit b : allBitsBob) {
             b.draw(g2d);
         }
+        g2d.setColor(MyColors.mySandLikeColor);
+        str = getPercentBitString(allBitsBob);
+        g2d.drawString("Bob's bit-string - " + str, offsetX, 7 * offsetY - upShiftHeader);
     }
 
     public String getPercentBitString(ArrayList<Bit> list) {
 
-        int count = 0;
+        int count0 = 0;
+        int count1 = 0;
+        int countArbitrary = 0;
         for (Bit b : list) {
             if (b.theBit == 1) {
-                count++;
+                count1++;
+            } else if (b.theBit < 0) {
+                countArbitrary++;
+            } else if (b.theBit == 0) {
+                count0++;
             }
         }
-        int percent = (count * 100) / list.size();
-        return percent + " % ";
+        int percent1 = (count1 * 100) / list.size();
+        int percent0 = (count0 * 100) / list.size();
+        String str = percent1 + " % '1' | " + percent0 + " % '0'";
+
+        if (countArbitrary > 0) {
+            str += " - may be wrong " + (100 - percent1 - percent0) + " %";
+        }
+
+        return str;
     }
 
     private void drawBackgroundImage(Graphics2D g2d) {
