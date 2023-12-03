@@ -11,7 +11,7 @@ import java.util.Random;
 
 public class Visualizer extends JButton {
 
-    private static final int height = 666;
+    private static final int height = 800;
     private static final int width = 1700;
     private Rectangle2D.Double highlighter;
     private BufferedImage image;
@@ -21,6 +21,7 @@ public class Visualizer extends JButton {
     private ArrayList<Scheme> allSchemesBob;
     private ArrayList<Scheme> allSchemesEve;
     private ArrayList<Bit> allBitsBob;
+    private ArrayList<Bit> allBitsEve;
     private final int offsetX = 140;
     private final int offsetY = height / 8;
     private BufferedImage alice;
@@ -44,13 +45,14 @@ public class Visualizer extends JButton {
         addMouseMotionListener(new MouseMotionAdapter() {
             @Override
             public void mouseDragged(MouseEvent e) {
-                handleMouseDragged(e);
+                handleMouse(e);
             }
+        });
 
-            private void handleMouseDragged(MouseEvent e) {
-                super.mouseDragged(e);
-                highlighter.x = roundToFixedInterval(e.getX(), boxWidth);
-                repaint();
+        addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                handleMouse(e);
             }
         });
 
@@ -112,6 +114,17 @@ public class Visualizer extends JButton {
             allSchemesEve.add(new Scheme(random.nextInt(2), xPos, 4 * offsetY, x, x));
         }
 
+        /// create Eve's bit-string ////////////////////////////////////////////////////////////////////////////////////
+        allBitsEve = new ArrayList<>();
+        for (int i = 0; i < numBits; i++) {
+            int bit = -1;
+            if (allSchemesEve.get(i).filter == allSchemesAlice.get(i).filter) {
+                bit = allBitsAlice.get(i).theBit;
+            }
+            double xPos = x * i + offsetX;
+            allBitsEve.add(new Bit(bit, xPos, 5 * offsetY, x, x));
+        }
+
         /// create Bob's es ///////////////////////////////////////////////////////////////////////////////////////
         allSchemesBob = new ArrayList<>();
         for (int i = 0; i < numBits; i++) {
@@ -158,9 +171,11 @@ public class Visualizer extends JButton {
 
         drawAliceBobEve(g2d);
 
-        drawHighlighter(g2d);
+        drawHighlighter(g2d, true);
 
         drawPhotonStuff(g2d);
+
+        drawHighlighter(g2d, false);
 
         drawHeaders(g2d);
     }
@@ -181,15 +196,17 @@ public class Visualizer extends JButton {
         }
     }
 
-    private void drawHighlighter(Graphics2D g2d) {
+    private void drawHighlighter(Graphics2D g2d, boolean fill) {
 
-        g2d.setColor(Color.WHITE);
-        g2d.fill(highlighter);
+        if (fill) {
+            g2d.setColor(MyColors.myOrange);
+            g2d.fill(highlighter);
+        } else {
+            g2d.setColor(MyColors.myLightGray);
+            g2d.draw(highlighter);
+        }
     }
 
-    private double roundToFixedInterval(double position, double interval) {
-        return Math.round((position - offsetX)  / interval) * interval + offsetX;
-    }
     private void drawPhotonStuff(Graphics2D g2d) {
 
         for (Bit b : allBitsAlice) {
@@ -203,6 +220,9 @@ public class Visualizer extends JButton {
         }
         if (drawEve) {
             for (Scheme b : allSchemesEve) {
+                b.draw(g2d);
+            }
+            for (Bit b : allBitsEve) {
                 b.draw(g2d);
             }
         }
@@ -297,7 +317,7 @@ public class Visualizer extends JButton {
         g2d.drawImage(image, 0, 0, getWidth(), getHeight(), Color.BLACK, this);
     }
 
-    /// handle key events //////////////////////////////////////////////////////////////////////////////////////////////
+    /// handle key and mouse events ////////////////////////////////////////////////////////////////////////////////////
     private void handleKeyPress(KeyEvent e) {
 
 //        System.out.println("code: " + e.getKeyCode());
@@ -365,6 +385,14 @@ public class Visualizer extends JButton {
         }
         repaint();
 
+    }
+
+    private void handleMouse(MouseEvent e) {
+        highlighter.x = Math.round((e.getX() - offsetX) / boxWidth) * boxWidth + offsetX;
+        if (highlighter.x < offsetX) {
+            highlighter.x = offsetX;
+        }
+        repaint();
     }
 
     /// last but not least the main function ///////////////////////////////////////////////////////////////////////////
