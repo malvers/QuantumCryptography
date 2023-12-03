@@ -49,7 +49,7 @@ public class Visualizer extends JButton {
 
             private void handleMouseDragged(MouseEvent e) {
                 super.mouseDragged(e);
-                highlighter.x = e.getX();
+                highlighter.x = roundToFixedInterval(e.getX(), boxWidth);
                 repaint();
             }
         });
@@ -142,6 +142,7 @@ public class Visualizer extends JButton {
         }
     }
 
+    /// paint section //////////////////////////////////////////////////////////////////////////////////////////////////
     @Override
     public void paint(Graphics g) {
 
@@ -183,11 +184,12 @@ public class Visualizer extends JButton {
     private void drawHighlighter(Graphics2D g2d) {
 
         g2d.setColor(Color.WHITE);
-
-        highlighter.x = Math.round(highlighter.x / boxWidth) * boxWidth + boxWidth / 2.0 - 5;
         g2d.fill(highlighter);
     }
 
+    private double roundToFixedInterval(double position, double interval) {
+        return Math.round((position - offsetX)  / interval) * interval + offsetX;
+    }
     private void drawPhotonStuff(Graphics2D g2d) {
 
         for (Bit b : allBitsAlice) {
@@ -245,7 +247,7 @@ public class Visualizer extends JButton {
         for (Scheme b : list) {
             if (b.filter == 1) {
                 count1++;
-            } else if (b.valide == false) {
+            } else if (!b.valid) {
                 countArbitrary++;
             } else if (b.filter == 0) {
                 count0++;
@@ -295,6 +297,7 @@ public class Visualizer extends JButton {
         g2d.drawImage(image, 0, 0, getWidth(), getHeight(), Color.BLACK, this);
     }
 
+    /// handle key events //////////////////////////////////////////////////////////////////////////////////////////////
     private void handleKeyPress(KeyEvent e) {
 
 //        System.out.println("code: " + e.getKeyCode());
@@ -364,6 +367,7 @@ public class Visualizer extends JButton {
 
     }
 
+    /// last but not least the main function ///////////////////////////////////////////////////////////////////////////
     public static void main(String[] args) {
 
         SwingUtilities.invokeLater(() -> {

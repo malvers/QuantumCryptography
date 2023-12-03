@@ -41,7 +41,6 @@ public class Bit extends MyBox {
             str = "" + theBit;
             int ws = g2d.getFontMetrics().stringWidth(str);
             int hs = g2d.getFontMetrics().getHeight();
-            System.out.println("hs: " + hs);
             int posX = (int) (x + ((width - ws) / 2.0));
             int posY = (int) (y + ((height - hs) / 2.0) + height/2.0 + 1);
             g2d.drawString(str, posX, posY);

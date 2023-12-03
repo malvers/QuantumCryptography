@@ -5,7 +5,7 @@ public class Scheme extends MyBox {
 
     protected int filter;
     private final Color backGroundColor = MyColors.myDarkGray;
-    protected boolean valide = true;
+    protected boolean valid = true;
 
     public Scheme(int filter, double x, double y, double w, double h) {
         super(x, y, w, h);
@@ -29,10 +29,10 @@ public class Scheme extends MyBox {
         facX = 6.0;
         if (filter == 0) {
 
-            if (valide) {
+            if (valid) {
                 g2d.setColor(MyColors.myRed);
             } else {
-                g2d.setColor(MyColors.myGray);
+                g2d.setColor(MyColors.myGray.darker());
             }
             ox = (width - (width / facX)) / 2;
             oy = (height - (height / facY)) / 2;
@@ -45,10 +45,10 @@ public class Scheme extends MyBox {
 
         } else {
 
-            if (valide) {
+            if (valid) {
                 g2d.setColor(MyColors.myGreen);
             } else {
-                g2d.setColor(MyColors.myGray);
+                g2d.setColor(MyColors.myGray.darker());
             }
             AffineTransform oldTransform = g2d.getTransform();
 
@@ -77,6 +77,6 @@ public class Scheme extends MyBox {
     }
 
     public void setValidity(boolean v) {
-       valide = v;
+       valid = v;
     }
 }
