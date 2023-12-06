@@ -23,7 +23,7 @@ public class Visualizer extends JButton {
     private ArrayList<Bit> allBitsBob;
     private ArrayList<Bit> allBitsEve;
     private final int offsetX = 140;
-    private final int offsetY = windowHeight / 9;
+    private double offsetY = windowHeight / 9;
     private BufferedImage alice;
     private BufferedImage bob;
     private BufferedImage eve;
@@ -34,6 +34,15 @@ public class Visualizer extends JButton {
     public Visualizer() {
 
         loadImages();
+
+        addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                offsetY = getHeight() / 9.0;
+                createAll();
+                repaint();
+            }
+        });
 
         addKeyListener(new KeyAdapter() {
             @Override
@@ -196,6 +205,8 @@ public class Visualizer extends JButton {
         drawHighlighter(g2d, false);
 
         drawHeaders(g2d);
+
+        offsetY = getHeight() / 9;
     }
 
     private void drawNumberOfBits(Graphics2D g2d) {
@@ -210,12 +221,12 @@ public class Visualizer extends JButton {
         int indent = 30;
         g2d.setColor(MyColors.mySandLikeColor);
         g2d.drawImage(alice, indent, (int) (1.7 * offsetY), alice.getWidth() / 16, alice.getHeight() / 16, null, this);
-        g2d.drawString("Alice", indent + 10, 3 * offsetY);
+        g2d.drawString("Alice", indent + 10, (int) (3 * offsetY));
         g2d.drawImage(bob, indent, (int) (7.1 * offsetY), alice.getWidth() / 16, alice.getHeight() / 16, null, this);
         g2d.drawString("Bob", indent + 14, (int) (8.38 * offsetY));
         if (eavsdropping) {
             g2d.drawImage(eve, 30, (int) (4.7 * offsetY), alice.getWidth() / 16, alice.getHeight() / 16, null, this);
-            g2d.drawString("Eve", indent + 14, 6 * offsetY);
+            g2d.drawString("Eve", indent + 14, (int) (6 * offsetY));
         }
     }
 
@@ -279,13 +290,13 @@ public class Visualizer extends JButton {
         String str;
 
         str = getPercentSchemes(allSchemesAlice);
-        g2d.drawString("Alice's schemes - " + str, offsetX, 2 * offsetY - upShiftHeader);
+        g2d.drawString("Alice's schemes - " + str, offsetX, (int) (2 * offsetY - upShiftHeader));
         str = getPercentSchemes(allSchemesBob);
-        g2d.drawString("Bob's schemes - " + str, offsetX, 7 * offsetY - upShiftHeader);
+        g2d.drawString("Bob's schemes - " + str, offsetX, (int) (7 * offsetY - upShiftHeader));
         str = getPercentBitString(allBitsAlice);
-        g2d.drawString("Alice's random bit-string - " + str, offsetX, offsetY - upShiftHeader);
+        g2d.drawString("Alice's random bit-string - " + str, offsetX, (int) (offsetY - upShiftHeader));
         str = getPercentBitString(allBitsBob);
-        g2d.drawString("Bob's bit-string - " + str, offsetX, 8 * offsetY - upShiftHeader);
+        g2d.drawString("Bob's bit-string - " + str, offsetX, (int) (8 * offsetY - upShiftHeader));
     }
 
     public String getPercentSchemes(ArrayList<Scheme> list) {
