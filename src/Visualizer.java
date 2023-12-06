@@ -10,8 +10,8 @@ import java.util.ArrayList;
 import java.util.Random;
 
 public class Visualizer extends JButton {
-    private static final int windowHeight = 800;
-    private static final int windowWidth = 1700;
+    private static final int initialWindowHeight = 800;
+    private static final int initialWindowWidth = 1700;
     private Rectangle2D.Double highlighter;
     private BufferedImage image;
     private ArrayList<Bit> allBitsAlice;
@@ -23,7 +23,7 @@ public class Visualizer extends JButton {
     private ArrayList<Bit> allBitsBob;
     private ArrayList<Bit> allBitsEve;
     private final int offsetX = 140;
-    private double offsetY = windowHeight / 9;
+    private double offsetY = initialWindowHeight / 9.0;
     private BufferedImage alice;
     private BufferedImage bob;
     private BufferedImage eve;
@@ -31,6 +31,9 @@ public class Visualizer extends JButton {
     private double boxWidth;
     private int numBits = 42;
 
+    /**
+     * A program to visualize the BB84 algorithm
+     */
     public Visualizer() {
 
         loadImages();
@@ -39,7 +42,7 @@ public class Visualizer extends JButton {
             @Override
             public void componentResized(ComponentEvent e) {
                 offsetY = getHeight() / 9.0;
-                createAll();
+                createAllRandom();
                 repaint();
             }
         });
@@ -65,18 +68,89 @@ public class Visualizer extends JButton {
             }
         });
 
-        createAll();
+        createAllRandom();
     }
 
-    private void createAll() {
+    /// create all bits and filters  ///////////////////////////////////////////////////////////////////////////////////
+    private void createAllPossibilities() {
+
+        numBits = 40;
+        boxWidth = 1500.0 / numBits;
+        double x = boxWidth;
+        double y = offsetY;
+
+        int[] integerPattern;
+
+        /// create Alice's bits 0 | 1 //////////////////////////////////////////////////////////////////////////////////
+        allBitsAlice = new ArrayList<>();
+        integerPattern = generateIntegerPattern(new int[]{0, 1}, 20);
+        int i = 0;
+        for (int bit : integerPattern) {
+            double xPos = x * (i++) + offsetX;
+            allBitsAlice.add(new Bit(bit, xPos, y, x, x));
+        }
+
+        /// create Alice's schemes 'x | +' /////////////////////////////////////////////////////////////////////////////
+        allSchemesAlice = new ArrayList<>();
+        integerPattern = generateIntegerPattern(new int[]{0, 0, 1, 1}, 10);
+        i = 0;
+        for (int filter : integerPattern) {
+            double xPos = x * (i++) + offsetX;
+            allSchemesAlice.add(new Scheme(filter, xPos, 2 * offsetY, x, x));
+        }
+
+        /// create Alice's transmissions '- \ / |' /////////////////////////////////////////////////////////////////////
+        integerPattern = generateIntegerPattern(new int[]{0, 1, 2, 3}, 10);
+        alicesTransmissions = new ArrayList<>();
+        i = 0;
+        for (int filter : integerPattern) {
+            double xPos = x * (i++) + offsetX;
+            alicesTransmissions.add(new Transmission(filter, xPos, 3 * offsetY, x, x));
+        }
+
+        /// create Alice's schemes /////////////////////////////////////////////////////////////////////////////////////
+        allSchemesEve = new ArrayList<>();
+
+        /// create Alice's bits ////////////////////////////////////////////////////////////////////////////////////////
+        allBitsEve = new ArrayList<>();
+
+        /// create Bob's schemes ///////////////////////////////////////////////////////////////////////////////////////
+        allSchemesBob = new ArrayList<>();
+        integerPattern = generateIntegerPattern(new int[]{0, 0, 1, 1}, 10);
+        i = 0;
+        for (int filter : integerPattern) {
+            double xPos = x * (i++) + offsetX;
+            allSchemesBob.add(new Scheme(filter, xPos, 7 * offsetY, x, x));
+        }
+
+        /// create Bob's bit-string ////////////////////////////////////////////////////////////////////////////////////
+        allBitsBob = new ArrayList<>();
+        integerPattern = generateIntegerPattern(new int[]{0, 1}, 20);
+        i = 0;
+        for (int bit : integerPattern) {
+            double xPos = x * (i++) + offsetX;
+            allBitsBob.add(new Bit(bit, xPos, 8 * offsetY, x, x));
+        }
+    }
+
+    private static int[] generateIntegerPattern(int[] pattern, int reps) {
+
+        int[] result = new int[pattern.length * reps];
+
+        for (int i = 0; i < reps; i++) {
+            System.arraycopy(pattern, 0, result, i * pattern.length, pattern.length);
+        }
+
+        return result;
+    }
+
+    private void createAllRandom() {
 
         Random random = new Random();
-
         boxWidth = 1500.0 / numBits;
         if (boxWidth > 36) {
             boxWidth = 36;
         }
-//        System.out.println("boxWidth: " + boxWidth);
 
         double x = boxWidth;
         double y = offsetY;
@@ -204,7 +278,7 @@ public class Visualizer extends JButton {
 
         drawHighlighter(g2d, false);
 
-        drawHeaders(g2d);
+        /// drawHeaders(g2d);
 
         offsetY = getHeight() / 9;
     }
@@ -365,14 +439,14 @@ public class Visualizer extends JButton {
         switch (e.getKeyCode()) {
 
             case KeyEvent.VK_SPACE:
-                createAll();
+                createAllRandom();
                 break;
             case KeyEvent.VK_UP:
                 numBits += 2;
                 if (numBits > 128) {
                     numBits = 128;
                 } else {
-                    createAll();
+                    createAllRandom();
                 }
                 break;
             case KeyEvent.VK_DOWN:
@@ -380,7 +454,7 @@ public class Visualizer extends JButton {
                 if (numBits < 10) {
                     numBits = 10;
                 } else {
-                    createAll();
+                    createAllRandom();
                 }
                 break;
             case KeyEvent.VK_ENTER:
@@ -392,10 +466,11 @@ public class Visualizer extends JButton {
             /// letter keys ////////////////////////////////////////////////////////////////////////////////////////////
             case KeyEvent.VK_4:
                 numBits = 42;
-                createAll();
+                createAllRandom();
                 break;
             /// letter keys ////////////////////////////////////////////////////////////////////////////////////////////
             case KeyEvent.VK_D:
+                createAllPossibilities();
                 break;
             case KeyEvent.VK_E:
                 eavsdropping = !eavsdropping;
@@ -410,7 +485,7 @@ public class Visualizer extends JButton {
                 } else {
                     numBits = 4;
                 }
-                createAll();
+                createAllRandom();
                 break;
             case KeyEvent.VK_P:
                 break;
@@ -428,7 +503,7 @@ public class Visualizer extends JButton {
     }
 
     private void handleMouse(MouseEvent e) {
-        highlighter.x = Math.round((e.getX() - offsetX) / boxWidth) * boxWidth + offsetX;
+        highlighter.x = Math.round((e.getX() - (boxWidth / 2) - offsetX) / boxWidth) * boxWidth + offsetX;
         if (highlighter.x < offsetX) {
             highlighter.x = offsetX;
         }
@@ -457,7 +532,7 @@ public class Visualizer extends JButton {
                     // Add your custom logic here
                 }
             });
-            f.setSize(windowWidth, windowHeight);
+            f.setSize(initialWindowWidth, initialWindowHeight);
             f.setLocation(0, 0);
             f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             f.setVisible(true);
