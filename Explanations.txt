@@ -1,0 +1,30 @@
+Alice sends a '0' using the '+' scheme. The polarization is '|'. Bob uses the right scheme '+' and measures a '0'.
+Alice sends a '1' using the '+' scheme. The polarization is '-'. Bob uses the right scheme '+' and measures a '1'.
+
+Alice sends a '0' using the 'x' scheme. The polarization is '\'. Bob uses the right scheme 'x' and measures a '0'.
+Alice sends a '1' using the 'x' scheme. The polarization is '/'. Bob uses the right scheme 'x' and measures a '1'.
+
+Alice sends a '0' using the '+' scheme. The polarization is '|'. Bob uses the wrong scheme 'x' and measures a '0' or a '1'.
+Alice sends a '0' using the '+' scheme. The polarization is '|'. Bob uses the wrong scheme 'x' and measures a '0' or a '1'.
+
+Alice sends a '1' using the '-' scheme. The polarization is '-'. Bob uses the wrong scheme 'x' and measures a '0' or a '1'.
+Alice sends a '1' using the '-' scheme. The polarization is '-'. Bob uses the wrong scheme 'x' and measures a '0' or a '1'.
+
+Alice sends a '0' using the '+' scheme. The polarization is '|'. Eve uses the right scheme '+' and measures a '0'. Bob uses the right scheme '+' and measures a '0'.
+Alice sends a '1' using the '+' scheme. The polarization is '-'. Eve uses the right scheme '+' and measures a '1'. Bob uses the right scheme '+' and measures a '1'.
+
+Alice sends a '0' using the 'x' scheme. The polarization is '\'. Eve uses the right scheme 'x' and measures a '0'. Bob uses the right scheme 'x' and measures a '0'.
+Alice sends a '1' using the 'x' scheme. The polarization is '/'. Eve uses the right scheme 'x' and measures a '1'. Bob uses the right scheme 'x' and measures a '1'.
+
+Alice sends a '0' using the '+' scheme. The polarization is '|'. Eve uses the wrong scheme 'x' and measures a '0'. Bob uses the right scheme '+' and measures a '0'.
+Alice sends a '0' using the '+' scheme. The polarization is '|'. Eve uses the wrong scheme 'x' and measures a '1'. Bob uses the right scheme '+' and measures a '1'. Contradiction!
+
+Alice sends a '0' using the 'x' scheme. The polarization is '\'. Eve uses the wrong scheme '+' and measures a '0'. Bob uses the right scheme 'x' and measures a '0'.
+Alice sends a '0' using the 'x' scheme. The polarization is '\'. Eve uses the wrong scheme '+' and measures a '1'. Bob uses the right scheme 'x' and measures a '1'. Contradiction!
+
+Alice sends a '1' using the '+' scheme. The polarization is '-'. Eve uses the wrong scheme 'x' and measures a '0'. Bob uses the right scheme '+' and measures a '0'. Contradiction!
+Alice sends a '1' using the '+' scheme. The polarization is '-'. Eve uses the wrong scheme 'x' and measures a '1'. Bob uses the right scheme '+' and measures a '1'.
+
+Alice sends a '1' using the 'x' scheme. The polarization is '/'. Eve uses the wrong scheme '+' and measures a '0'. Bob uses the right scheme 'x' and measures a '0'. Contradiction!
+Alice sends a '1' using the 'x' scheme. The polarization is '/'. Eve uses the wrong scheme '+' and measures a '1'. Bob uses the right scheme 'x' and measures a '1'.
+

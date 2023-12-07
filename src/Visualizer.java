@@ -12,6 +12,7 @@ public class Visualizer extends JButton {
 
     private static final int initialWindowHeight = 800;
     private static final int initialWindowWidth = 1700;
+    private final ReadExplanations explanations;
     private Rectangle2D.Double highlighter;
     private BufferedImage image;
     private ArrayList<Bit> allBitsAlice;
@@ -32,6 +33,8 @@ public class Visualizer extends JButton {
     private int numBits = 42;
     private boolean demoMode = false;
     private double gap = 6;
+    private Rectangle2D.Double toolTip;
+    private String toolTipText = "";
 
     /**
      * A program to visualize the BB84 algorithm
@@ -44,6 +47,8 @@ public class Visualizer extends JButton {
         Runtime.getRuntime().addShutdownHook(myHook);
 
         loadImages();
+
+        explanations = new ReadExplanations();
 
         f.setTitle("BB 84 - Bennett-Brassard 1984");
 
@@ -140,7 +145,7 @@ public class Visualizer extends JButton {
 
         /// create Alice's bits 0 | 1 //////////////////////////////////////////////////////////////////////////////////
         allBitsAlice = new ArrayList<>();
-        pattern = new int[]{0, 1, 0, 1, 0, 0, 1, 1, 0, 1, 0, 1};
+        pattern = new int[]{0, 1, 0, 1, 0, 0, 1, 1, 0, 1, 0, 1, 0, 0, 0, 0, 1, 1, 1, 1};
         int i = 0;
         gap = 0;
         for (int bit : pattern) {
@@ -151,7 +156,7 @@ public class Visualizer extends JButton {
 
         /// create Alice's schemes 'x | +' /////////////////////////////////////////////////////////////////////////////
         allSchemesAlice = new ArrayList<>();
-        pattern = new int[]{0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1};
+        pattern = new int[]{0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1};
         i = 0;
         gap = 0;
         for (int filter : pattern) {
@@ -161,7 +166,7 @@ public class Visualizer extends JButton {
         }
 
         /// create Alice's transmissions '- \ / |' /////////////////////////////////////////////////////////////////////
-        pattern = new int[]{0, 1, 2, 3, 0, 0, 1, 1, 0, 1, 2, 3};
+        pattern = new int[]{0, 1, 2, 3, 0, 0, 1, 1, 0, 1, 2, 3, 0, 0, 2, 2, 1, 1, 3, 3};
         allTransmissionsAlice = new ArrayList<>();
         i = 0;
         gap = 0;
@@ -174,7 +179,7 @@ public class Visualizer extends JButton {
 /////// Eve ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         /// create Eve's schemes ///////////////////////////////////////////////////////////////////////////////////////
-        pattern = new int[]{-2, -2, -2, -2, -2, -2, -2, -2, 0, 0, 1, 1};
+        pattern = new int[]{-2, -2, -2, -2, -2, -2, -2, -2, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0};
         allSchemesEve = new ArrayList<>();
         i = 0;
         gap = 0;
@@ -186,33 +191,35 @@ public class Visualizer extends JButton {
             allSchemesEve.add(s);
         }
 
+        /// create Eve's bits //////////////////////////////////////////////////////////////////////////////////////////
+        allBitsEve = new ArrayList<>();
+        pattern = new int[]{-2, -2, -2, -2, -2, -2, -2, -2, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1};
+        i = 0;
+        gap = 0;
+        for (int filter : pattern) {
+            double xPos = x * (i++) + offsetX;
+            addGaps(i);
+            allBitsEve.add(new Bit(filter, xPos + gap, 5 * offsetY, x, x));
+        }
         /// create Eve's transmissions /////////////////////////////////////////////////////////////////////////////////
-        pattern = new int[]{-2, -2, -2, -2, -2, -2, -2, -2, 0, 1, 2, 3};
+        pattern = new int[]{-2, -2, -2, -2, -2, -2, -2, -2, 0, 1, 2, 3, -1, -1, -1, -1, -1, -1, -1, -1};
         allTransmissionsEve = new ArrayList<>();
         i = 0;
         gap = 0;
         for (int transmission : pattern) {
             double xPos = x * (i++) + offsetX;
             addGaps(i);
-            allTransmissionsEve.add(new Transmission(transmission, xPos + gap, 5 * offsetY, x, x));
+            Transmission t = new Transmission(transmission, xPos + gap, 6 * offsetY, x, x);
+//            t.set
+            allTransmissionsEve.add(t);
         }
 
-        /// create Eve's bits //////////////////////////////////////////////////////////////////////////////////////////
-        allBitsEve = new ArrayList<>();
-        pattern = new int[]{-2, -2, -2, -2, -2, -2, -2, -2, 0, 1, 0, 1};
-        i = 0;
-        gap = 0;
-        for (int filter : pattern) {
-            double xPos = x * (i++) + offsetX;
-            addGaps(i);
-            allBitsEve.add(new Bit(filter, xPos + gap, 6 * offsetY, x, x));
-        }
 
 /////// Bob ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         /// create Bob's schemes ///////////////////////////////////////////////////////////////////////////////////////
         allSchemesBob = new ArrayList<>();
-        pattern = new int[]{0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1};
+        pattern = new int[]{0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1};
         i = 0;
         gap = 0;
         for (int filter : pattern) {
@@ -225,7 +232,7 @@ public class Visualizer extends JButton {
 
         /// create Bob's bit-string ////////////////////////////////////////////////////////////////////////////////////
         allBitsBob = new ArrayList<>();
-        pattern = new int[]{0, 1, 0, 1, 0, 0, 1, 1, 0, 1, 0, 1};
+        pattern = new int[]{0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1};
         i = 0;
         gap = 0;
         for (int bit : pattern) {
@@ -235,6 +242,11 @@ public class Visualizer extends JButton {
         }
 
         highlighter = new Rectangle2D.Double(-100, offsetY, x, offsetY * 7 + boxWidth);
+        int num = allBitsAlice.size();
+//        System.out.println("num bits: " + num);
+        Bit bit = allBitsAlice.get(num - 1);
+
+        toolTip = new Rectangle2D.Double(offsetX, boxWidth / 2.0, getWidth() - offsetX - boxWidth, boxWidth);
     }
 
     private void createAllRandom() {
@@ -345,8 +357,9 @@ public class Visualizer extends JButton {
 
     private void addGaps(int i) {
 
-        if (i == 4 || i == 6 || i == 8) {
-            gap += 6;
+        if (i == 3 || i == 5 || i == 7 || i == 9 || i == 11 || i == 13 || i == 17) {
+            double gapSize = 12;
+            gap += gapSize;
         }
     }
 
@@ -383,14 +396,16 @@ public class Visualizer extends JButton {
 
         drawHighlighter(g2d, false);
 
-        /// TODO: include again drawHeaders(g2d);
+        if (!demoMode) {
+            drawHeaders(g2d);
+        }
     }
 
     private void drawNumberOfBits(Graphics2D g2d) {
 
-        g2d.setColor(MyColors.myOrange);
-        g2d.setFont(new Font("Arial", Font.PLAIN, 14));
-        g2d.drawString("Number of bits: " + numBits, offsetX, 40);
+        g2d.setColor(MyColors.myGray);
+        g2d.setFont(new Font("Arial", Font.PLAIN, 12));
+        g2d.drawString("Number of bits: " + numBits, 10, 16);
     }
 
     private void drawAliceBobEve(Graphics2D g2d) {
@@ -412,9 +427,18 @@ public class Visualizer extends JButton {
 
     private void drawHighlighter(Graphics2D g2d, boolean fill) {
 
+        Color textColor = MyColors.myDarkGray;
         if (fill) {
             g2d.setColor(MyColors.myOrange);
+            if (toolTipText.contains("Contradiction")) {
+                g2d.setColor(MyColors.myRed);
+                textColor = MyColors.mySandLikeColor;
+            }
             g2d.fill(highlighter);
+            g2d.fill(toolTip);
+            g2d.setFont(new Font("Arial", Font.PLAIN, (int) (boxWidth / 2)));
+            g2d.setColor(textColor);
+            g2d.drawString(toolTipText, offsetX + 6, (int) (toolTip.y + boxWidth - 12));
         } else {
             g2d.setColor(MyColors.myLightGray);
             g2d.draw(highlighter);
@@ -616,10 +640,14 @@ public class Visualizer extends JButton {
 
     private void handleMouse(MouseEvent e) {
 
+        int i = 0;
         for (MyBox b : allBitsAlice) {
             Rectangle2D.Double rect = new Rectangle2D.Double(b.x, 0, boxWidth, getHeight());
+            toolTipText = explanations.getLine(i);
+            i++;
             if (rect.contains(e.getX(), e.getY())) {
                 highlighter.x = b.x;
+                break;
             }
         }
         repaint();

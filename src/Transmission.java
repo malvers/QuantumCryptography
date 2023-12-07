@@ -21,7 +21,6 @@ public class Transmission extends MyBox {
             g2d.draw(this);
         }
 
-        g2d.setColor(MyColors.myRed);
         double facY;
         double facX;
         double ox;
@@ -80,7 +79,11 @@ public class Transmission extends MyBox {
             g2d.fill(new Double(x + ox, y + oy, width / facX, height / facY));
 
             g2d.setTransform(oldTransform);
+
+        } else if (transmission == -1) {
+            /// is empty
         }
+
         g2d.setColor(color);
     }
 }
