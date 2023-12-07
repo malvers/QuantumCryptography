@@ -34,7 +34,8 @@ public class Visualizer extends JButton {
     private boolean demoMode = false;
     private double gap = 6;
     private Rectangle2D.Double toolTip;
-    private String toolTipText = "";
+    private String toolTipText = "The demo mode shows all possible outcomes ...";
+    private int highlighterPosition = 0;
 
     /**
      * A program to visualize the BB84 algorithm
@@ -241,9 +242,8 @@ public class Visualizer extends JButton {
             allBitsBob.add(new Bit(bit, xPos + gap, 8 * offsetY, x, x));
         }
 
-        highlighter = new Rectangle2D.Double(-100, offsetY, x, offsetY * 7 + boxWidth);
+        highlighter = new Rectangle2D.Double(offsetX, offsetY, x, offsetY * 7 + boxWidth);
         int num = allBitsAlice.size();
-//        System.out.println("num bits: " + num);
         Bit bit = allBitsAlice.get(num - 1);
 
         toolTip = new Rectangle2D.Double(offsetX, boxWidth / 2.0, getWidth() - offsetX - boxWidth, boxWidth);
@@ -429,8 +429,8 @@ public class Visualizer extends JButton {
 
         Color textColor = MyColors.myDarkGray;
         if (fill) {
-            g2d.setColor(MyColors.myOrange);
-            if (toolTipText.contains("Contradiction")) {
+            g2d.setColor(MyColors.myGreen);
+            if (toolTipText.contains("Contradiction") || toolTipText.contains("'0' or a '1'")) {
                 g2d.setColor(MyColors.myRed);
                 textColor = MyColors.mySandLikeColor;
             }
@@ -595,7 +595,10 @@ public class Visualizer extends JButton {
             case KeyEvent.VK_ENTER:
                 break;
             case KeyEvent.VK_LEFT:
+                handleLeftRight(-1);
+                break;
             case KeyEvent.VK_RIGHT:
+                handleLeftRight(+1);
                 break;
 
             /// letter keys ////////////////////////////////////////////////////////////////////////////////////////////
@@ -636,6 +639,22 @@ public class Visualizer extends JButton {
                 break;
         }
         repaint();
+    }
+
+    private void handleLeftRight(int dir) {
+
+        highlighterPosition += dir;
+
+        if (highlighterPosition < 0) {
+            highlighterPosition = 0;
+        }
+        if (highlighterPosition >= allBitsAlice.size()) {
+            highlighterPosition = allBitsAlice.size() - 1;
+        }
+
+        highlighter.x = allBitsAlice.get(highlighterPosition).x;
+        toolTipText = explanations.getLine(highlighterPosition);
+
     }
 
     private void handleMouse(MouseEvent e) {
