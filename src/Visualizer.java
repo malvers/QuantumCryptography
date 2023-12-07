@@ -430,15 +430,19 @@ public class Visualizer extends JButton {
         Color textColor = MyColors.myDarkGray;
         if (fill) {
             g2d.setColor(MyColors.myGreen);
-            if (toolTipText.contains("Contradiction") || toolTipText.contains("'0' or a '1'")) {
+            if (toolTipText.contains("Contradiction") ||
+                    toolTipText.contains("'0' or a '1'") ||
+                    allBitsBob.get(highlighterPosition).theBit == -1) {
                 g2d.setColor(MyColors.myRed);
                 textColor = MyColors.mySandLikeColor;
             }
             g2d.fill(highlighter);
-            g2d.fill(toolTip);
-            g2d.setFont(new Font("Arial", Font.PLAIN, (int) (boxWidth / 2)));
-            g2d.setColor(textColor);
-            g2d.drawString(toolTipText, offsetX + 6, (int) (toolTip.y + boxWidth - 12));
+            if (demoMode) {
+                g2d.fill(toolTip);
+                g2d.setFont(new Font("Arial", Font.PLAIN, (int) (boxWidth / 2)));
+                g2d.setColor(textColor);
+                g2d.drawString(toolTipText, offsetX + 6, (int) (toolTip.y + boxWidth - 12));
+            }
         } else {
             g2d.setColor(MyColors.myLightGray);
             g2d.draw(highlighter);
@@ -569,8 +573,6 @@ public class Visualizer extends JButton {
 
     private void handleKeyPress(KeyEvent e) {
 
-//        System.out.println("code: " + e.getKeyCode());
-
         switch (e.getKeyCode()) {
 
             case KeyEvent.VK_SPACE:
@@ -601,7 +603,7 @@ public class Visualizer extends JButton {
                 handleLeftRight(+1);
                 break;
 
-            /// letter keys ////////////////////////////////////////////////////////////////////////////////////////////
+            /// number keys ////////////////////////////////////////////////////////////////////////////////////////////
             case KeyEvent.VK_4:
                 numBits = 42;
                 creation();
@@ -610,7 +612,7 @@ public class Visualizer extends JButton {
             /// letter keys ////////////////////////////////////////////////////////////////////////////////////////////
             case KeyEvent.VK_D:
                 demoMode = !demoMode;
-                createAllPossibilities();
+                creation();
                 break;
             case KeyEvent.VK_E:
                 eavesDropping = !eavesDropping;
@@ -653,7 +655,9 @@ public class Visualizer extends JButton {
         }
 
         highlighter.x = allBitsAlice.get(highlighterPosition).x;
-        toolTipText = explanations.getLine(highlighterPosition);
+        if (demoMode) {
+            toolTipText = explanations.getLine(highlighterPosition);
+        }
 
     }
 
@@ -662,17 +666,21 @@ public class Visualizer extends JButton {
         int i = 0;
         for (MyBox b : allBitsAlice) {
             Rectangle2D.Double rect = new Rectangle2D.Double(b.x, 0, boxWidth, getHeight());
-            toolTipText = explanations.getLine(i);
-            i++;
+            if (demoMode) {
+                toolTipText = explanations.getLine(i);
+            }
             if (rect.contains(e.getX(), e.getY())) {
                 highlighter.x = b.x;
+                highlighterPosition = i;
                 break;
             }
+            i++;
         }
         repaint();
     }
 
     /// last but not least the main function ///////////////////////////////////////////////////////////////////////////
+
     public static void main(String[] args) {
 
         SwingUtilities.invokeLater(() -> {
