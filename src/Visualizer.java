@@ -31,6 +31,7 @@ public class Visualizer extends JButton {
     private double boxWidth;
     private int numBits = 42;
     private boolean demoMode = false;
+    private double gap = 6;
 
     /**
      * A program to visualize the BB84 algorithm
@@ -134,92 +135,103 @@ public class Visualizer extends JButton {
         double y = offsetY;
 
         int[] pattern;
-        double gap = 0.0;
+
+/////// Alice //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         /// create Alice's bits 0 | 1 //////////////////////////////////////////////////////////////////////////////////
         allBitsAlice = new ArrayList<>();
-        pattern = new int[]{0, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 1};
+        pattern = new int[]{0, 1, 0, 1, 0, 0, 1, 1, 0, 1, 0, 1};
         int i = 0;
+        gap = 0;
         for (int bit : pattern) {
             double xPos = x * (i++) + offsetX;
-            xPos = addGap(gap, i, xPos);
-            allBitsAlice.add(new Bit(bit, xPos, y, x, x));
+            addGaps(i);
+            allBitsAlice.add(new Bit(bit, xPos + gap, y, x, x));
         }
 
         /// create Alice's schemes 'x | +' /////////////////////////////////////////////////////////////////////////////
         allSchemesAlice = new ArrayList<>();
-        pattern = new int[]{0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1};
+        pattern = new int[]{0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1};
         i = 0;
+        gap = 0;
         for (int filter : pattern) {
             double xPos = x * (i++) + offsetX;
-            xPos = addGap(gap, i, xPos);
-            allSchemesAlice.add(new Scheme(filter, xPos, 2 * offsetY, x, x));
+            addGaps(i);
+            allSchemesAlice.add(new Scheme(filter, xPos + gap, 2 * offsetY, x, x));
         }
 
         /// create Alice's transmissions '- \ / |' /////////////////////////////////////////////////////////////////////
-        pattern = new int[]{0, 1, 2, 3, 0, 0, 1, 1, 2, 2, 3, 3};
+        pattern = new int[]{0, 1, 2, 3, 0, 0, 1, 1, 0, 1, 2, 3};
         allTransmissionsAlice = new ArrayList<>();
         i = 0;
+        gap = 0;
         for (int filter : pattern) {
             double xPos = x * (i++) + offsetX;
-            xPos = addGap(gap, i, xPos);
-            allTransmissionsAlice.add(new Transmission(filter, xPos, 3 * offsetY, x, x));
+            addGaps(i);
+            allTransmissionsAlice.add(new Transmission(filter, xPos + gap, 3 * offsetY, x, x));
         }
 
-        /// TODO: implement --------------------------
+/////// Eve ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         /// create Eve's schemes ///////////////////////////////////////////////////////////////////////////////////////
-        pattern = new int[]{-2, -2, -2, -2, 1, 1, 1, 1, 0, 0, 0, 0};
+        pattern = new int[]{-2, -2, -2, -2, -2, -2, -2, -2, 0, 0, 1, 1};
         allSchemesEve = new ArrayList<>();
         i = 0;
+        gap = 0;
         for (int scheme : pattern) {
             double xPos = x * (i++) + offsetX;
-            xPos = addGap(gap, i, xPos);
-            Scheme s = new Scheme(scheme, xPos, 4 * offsetY, x, x);
+            addGaps(i);
+            Scheme s = new Scheme(scheme, xPos + gap, 4 * offsetY, x, x);
             s.setValidity(scheme == s.filter);
             allSchemesEve.add(s);
         }
 
         /// create Eve's transmissions /////////////////////////////////////////////////////////////////////////////////
-        pattern = new int[]{-2, -2, -2, -2, 1, 1, 1, 1, 0, 0, 0, 0};
+        pattern = new int[]{-2, -2, -2, -2, -2, -2, -2, -2, 0, 1, 2, 3};
         allTransmissionsEve = new ArrayList<>();
         i = 0;
+        gap = 0;
         for (int transmission : pattern) {
             double xPos = x * (i++) + offsetX;
-            xPos = addGap(gap, i, xPos);
-            allTransmissionsEve.add(new Transmission(transmission, xPos, 5 * offsetY, x, x));
+            addGaps(i);
+            allTransmissionsEve.add(new Transmission(transmission, xPos + gap, 5 * offsetY, x, x));
         }
 
         /// create Eve's bits //////////////////////////////////////////////////////////////////////////////////////////
         allBitsEve = new ArrayList<>();
-        pattern = new int[]{-2, -2, -2, -2, 1, 1, 1, 1, 0, 0, 0, 0};
+        pattern = new int[]{-2, -2, -2, -2, -2, -2, -2, -2, 0, 1, 0, 1};
         i = 0;
+        gap = 0;
         for (int filter : pattern) {
             double xPos = x * (i++) + offsetX;
-            xPos = addGap(gap, i, xPos);
-            allBitsEve.add(new Bit(filter, xPos, 6 * offsetY, x, x));
+            addGaps(i);
+            allBitsEve.add(new Bit(filter, xPos + gap, 6 * offsetY, x, x));
         }
+
+/////// Bob ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         /// create Bob's schemes ///////////////////////////////////////////////////////////////////////////////////////
         allSchemesBob = new ArrayList<>();
-        pattern = new int[]{0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0};
+        pattern = new int[]{0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1};
         i = 0;
+        gap = 0;
         for (int filter : pattern) {
             double xPos = x * (i++) + offsetX;
-            xPos = addGap(gap, i, xPos);
-            Scheme s = new Scheme(filter, xPos, 7 * offsetY, x, x);
+            addGaps(i);
+            Scheme s = new Scheme(filter, xPos + gap, 7 * offsetY, x, x);
             s.setValidity(filter == s.filter);
             allSchemesBob.add(s);
         }
 
         /// create Bob's bit-string ////////////////////////////////////////////////////////////////////////////////////
         allBitsBob = new ArrayList<>();
-        pattern = new int[]{0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1};
+        pattern = new int[]{0, 1, 0, 1, 0, 0, 1, 1, 0, 1, 0, 1};
         i = 0;
+        gap = 0;
         for (int bit : pattern) {
             double xPos = x * (i++) + offsetX;
-            xPos = addGap(gap, i, xPos);
-            allBitsBob.add(new Bit(bit, xPos, 8 * offsetY, x, x));
+            addGaps(i);
+            allBitsBob.add(new Bit(bit, xPos + gap, 8 * offsetY, x, x));
         }
 
         highlighter = new Rectangle2D.Double(-100, offsetY, x, offsetY * 7 + boxWidth);
@@ -331,11 +343,11 @@ public class Visualizer extends JButton {
         }
     }
 
-    private double addGap(double gap, int i, double xPos) {
-        if (i > 4) {
-            xPos += gap;
+    private void addGaps(int i) {
+
+        if (i == 4 || i == 6 || i == 8) {
+            gap += 6;
         }
-        return xPos;
     }
 
     private void loadImages() {
@@ -603,9 +615,12 @@ public class Visualizer extends JButton {
     }
 
     private void handleMouse(MouseEvent e) {
-        highlighter.x = Math.round((e.getX() - (boxWidth / 2) - offsetX) / boxWidth) * boxWidth + offsetX;
-        if (highlighter.x < offsetX) {
-            highlighter.x = offsetX;
+
+        for (MyBox b : allBitsAlice) {
+            Rectangle2D.Double rect = new Rectangle2D.Double(b.x, 0, boxWidth, getHeight());
+            if (rect.contains(e.getX(), e.getY())) {
+                highlighter.x = b.x;
+            }
         }
         repaint();
     }
