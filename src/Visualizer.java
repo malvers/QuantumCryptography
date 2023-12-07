@@ -459,7 +459,7 @@ public class Visualizer extends JButton {
         if (eavesDropping) {
 
             g2d.setColor(MyColors.mySandLikeColor);
-            g2d.draw(new Rectangle2D.Double(10, 4 * offsetY - 10, getWidth() - 20, 2.64 * offsetY));
+            g2d.draw(new Rectangle2D.Double(10, 4 * offsetY - 24, getWidth() - 20, 2.80 * offsetY));
 
             for (Scheme s : allSchemesEve) {
                 s.draw(g2d);
@@ -488,16 +488,26 @@ public class Visualizer extends JButton {
         g2d.setColor(MyColors.mySandLikeColor);
 
         String str;
-
         str = getPercentSchemes(allSchemesAlice);
         g2d.drawString("Alice's schemes: " + str, offsetX, (int) (2 * offsetY - upShiftHeader));
         str = getPercentPolarizations(allPolarizationsAlice);
         g2d.drawString("Polarizations: - " + str, offsetX, (int) (3 * offsetY - upShiftHeader));
+
+        if (eavesDropping) {
+            str = getPercentSchemes(allSchemesEve);
+            g2d.drawString("Eve's schemes: " + str, offsetX, (int) (4 * offsetY - upShiftHeader));
+            str = getPercentBit(allBitsEve);
+            g2d.drawString("Eve's bit-string: " + str, offsetX, (int) (5 * offsetY - upShiftHeader));
+            str = getPercentPolarizations(allPolarizationsEve);
+            g2d.drawString("Polarizations: - " + str, offsetX, (int) (6 * offsetY - upShiftHeader));
+        }
+
+
         str = getPercentSchemes(allSchemesBob);
         g2d.drawString("Bob's schemes: " + str, offsetX, (int) (7 * offsetY - upShiftHeader));
-        str = getPercentBitString(allBitsAlice);
-        g2d.drawString("Alice's random bit-string - " + str, offsetX, (int) (offsetY - upShiftHeader));
-        str = getPercentBitString(allBitsBob);
+        str = getPercentBit(allBitsAlice);
+        g2d.drawString("Alice's random bit-string: " + str, offsetX, (int) (offsetY - upShiftHeader));
+        str = getPercentBit(allBitsBob);
         g2d.drawString("Bob's bit-string: " + str, offsetX, (int) (8 * offsetY - upShiftHeader));
     }
 
@@ -520,38 +530,43 @@ public class Visualizer extends JButton {
         String str = percent1 + " % '+' - " + (100 - percent1) + " % 'x'";
 
         if (countArbitrary > 0) {
-            str += " - may be wrong " + (100 - percent1 - percent0) + " %";
+            str += " - may be wrong " + (100 - percent1 - percent0) + " % '1|0'";
         }
 
         return str;
     }
 
-    public String getPercentPolarizations(ArrayList<Scheme> list) {
+    public String getPercentPolarizations(ArrayList<Polarisation> list) {
 
         int count0 = 0;
         int count1 = 0;
-        int countArbitrary = 0;
-        for (Scheme b : list) {
-            if (b.filter == 1) {
-                count1++;
-            } else if (!b.valid) {
-                countArbitrary++;
-            } else if (b.filter == 0) {
+        int count2 = 0;
+        int count3 = 0;
+        int count_1 = 0;
+        for (Polarisation b : list) {
+            if (b.polarization == 0) {
                 count0++;
+            } else if (b.polarization == 1) {
+                count1++;
+            } else if (b.polarization == 2) {
+                count2++;
+            } else if (b.polarization == 3) {
+                count3++;
+            } else if (b.polarization == -1) {
+                count_1++;
             }
         }
-        int percent1 = (count1 * 100) / list.size();
         int percent0 = (count0 * 100) / list.size();
-        String str = percent1 + " % '+' - " + (100 - percent1) + " % 'x'";
-
-        if (countArbitrary > 0) {
-            str += " - may be wrong " + (100 - percent1 - percent0) + " %";
-        }
+        int percent1 = (count1 * 100) / list.size();
+        int percent2 = (count2 * 100) / list.size();
+        int percent3 = (count3 * 100) / list.size();
+        int percent_1 = (count_1 * 100) / list.size();
+        String str = percent0 + " % '|' - " + percent1 + " % '-' " + percent2 + " % '\\' " + percent3 + " % '/' " + percent_1 + " % '|-/\\' ";
 
         return str;
     }
 
-    public String getPercentBitString(ArrayList<Bit> list) {
+    public String getPercentBit(ArrayList<Bit> list) {
 
         int count0 = 0;
         int count1 = 0;
@@ -570,7 +585,7 @@ public class Visualizer extends JButton {
         String str = percent1 + " % '1' - " + percent0 + " % '0'";
 
         if (countArbitrary > 0) {
-            str += " - may be wrong " + (100 - percent1 - percent0) + " %";
+            str += " - may be wrong " + (100 - percent1 - percent0) + " % '1|0'";
         }
 
         return str;
@@ -601,16 +616,16 @@ public class Visualizer extends JButton {
                 break;
             case KeyEvent.VK_UP:
                 numBits += 2;
-                if (numBits > 128) {
-                    numBits = 128;
+                if (numBits > 256) {
+                    numBits = 256;
                 } else {
                     creation();
                 }
                 break;
             case KeyEvent.VK_DOWN:
                 numBits -= 2;
-                if (numBits < 10) {
-                    numBits = 10;
+                if (numBits < 12) {
+                    numBits = 12;
                 } else {
                     creation();
                 }
@@ -646,7 +661,7 @@ public class Visualizer extends JButton {
                 if (e.isShiftDown()) {
                     numBits = 256;
                 } else {
-                    numBits = 4;
+                    numBits = 12;
                 }
                 creation();
                 break;

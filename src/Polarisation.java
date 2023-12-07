@@ -3,18 +3,18 @@ import java.awt.geom.AffineTransform;
 
 public class Polarisation extends MyBox {
 
-    protected final int transmission;
+    protected final int polarization;
 
     public Polarisation(int theCase, double x, double y, double w, double h) {
         super(x, y, w, h);
-        transmission = theCase;
+        polarization = theCase;
     }
 
     protected void draw(Graphics2D g2d) {
 
         Color color = g2d.getColor();
 
-        if (transmission != -2) {
+        if (polarization != -2) {
             g2d.setColor(MyColors.myGray);
             g2d.fill(this);
             g2d.setColor(Color.LIGHT_GRAY);
@@ -26,7 +26,7 @@ public class Polarisation extends MyBox {
         double ox;
         double oy;
 
-        if (transmission == 0) {
+        if (polarization == 0) {
 
             g2d.setColor(MyColors.myRed);
             facY = 1.4;
@@ -35,7 +35,7 @@ public class Polarisation extends MyBox {
             oy = (height - (height / facY)) / 2;
             g2d.fill(new Double(x + ox, y + oy, width / facX, height / facY));
 
-        } else if (transmission == 1) {
+        } else if (polarization == 1) {
 
             g2d.setColor(MyColors.myGreen);
             facY = 6.0;
@@ -44,7 +44,7 @@ public class Polarisation extends MyBox {
             oy = (height - (height / facY)) / 2;
             g2d.fill(new Double(x + ox, y + oy, width / facX, height / facY));
 
-        } else if (transmission == 2) {
+        } else if (polarization == 2) {
 
             facY = 6.0;
             facX = 1.4;
@@ -62,7 +62,7 @@ public class Polarisation extends MyBox {
 
             g2d.setTransform(oldTransform);
 
-        } else if (transmission == 3) {
+        } else if (polarization == 3) {
 
             facY = 6.0;
             facX = 1.4;
@@ -80,7 +80,7 @@ public class Polarisation extends MyBox {
 
             g2d.setTransform(oldTransform);
 
-        } else if (transmission == -1) {
+        } else if (polarization == -1) {
             /// is empty
         }
 
