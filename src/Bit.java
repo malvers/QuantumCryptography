@@ -13,10 +13,12 @@ public class Bit extends MyBox {
 
     protected void draw(Graphics2D g2d) {
 
-        g2d.setColor(MyColors.myLightGray);
-        g2d.draw(this);
+        if (theBit != -2) {
+            g2d.setColor(MyColors.myLightGray);
+            g2d.draw(this);
+        }
 
-        if (theBit < 0) {
+        if (theBit == -1) {
 
             g2d.setColor(new Color(0.0f, 0.0f, 0.0f, 0.5f));
 
@@ -57,6 +59,7 @@ public class Bit extends MyBox {
             int posX = (int) (x + ((width - ws) / 2.0));
             int posY = (int) (y + ((height - hs) / 2.0) + height / 2.0 + 1);
             g2d.drawString(str, posX, posY);
+
         }
     }
 }

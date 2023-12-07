@@ -27,22 +27,25 @@ public class Visualizer extends JButton {
     private BufferedImage alice;
     private BufferedImage bob;
     private BufferedImage eve;
-    private boolean eavsdropping = false;
+    private boolean eavesdropping = false;
     private double boxWidth;
     private int numBits = 42;
+    private boolean demoMode = false;
 
     /**
      * A program to visualize the BB84 algorithm
      */
-    public Visualizer() {
+    public Visualizer(JFrame f) {
 
         loadImages();
+
+        f.setTitle("BB 84 - Bennett-Brassard 1984");
 
         addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
                 offsetY = getHeight() / 9.0;
-                createAllRandom();
+                creation();
                 repaint();
             }
         });
@@ -68,7 +71,15 @@ public class Visualizer extends JButton {
             }
         });
 
-        createAllRandom();
+        creation();
+    }
+
+    private void creation() {
+        if (demoMode == true) {
+            createAllPossibilities();
+        } else {
+            createAllRandom();
+        }
     }
 
     /// create all bits and filters  ///////////////////////////////////////////////////////////////////////////////////
@@ -76,37 +87,45 @@ public class Visualizer extends JButton {
 
         numBits = 40;
         boxWidth = 1500.0 / numBits;
+        if (boxWidth > 36) {
+            boxWidth = 36;
+        }
         double x = boxWidth;
         double y = offsetY;
 
         int[] integerPattern;
+        double gap = 0.0;
 
         /// create Alice's bits 0 | 1 //////////////////////////////////////////////////////////////////////////////////
         allBitsAlice = new ArrayList<>();
-        integerPattern = generateIntegerPattern(new int[]{0, 1}, 20);
+        integerPattern = new int[]{0, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 1};
         int i = 0;
         for (int bit : integerPattern) {
             double xPos = x * (i++) + offsetX;
+            xPos = addGap(gap, i, xPos);
             allBitsAlice.add(new Bit(bit, xPos, y, x, x));
         }
 
         /// create Alice's schemes 'x | +' /////////////////////////////////////////////////////////////////////////////
         allSchemesAlice = new ArrayList<>();
-        integerPattern = generateIntegerPattern(new int[]{0, 0, 1, 1}, 10);
+        integerPattern = new int[]{0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1};
         i = 0;
         for (int filter : integerPattern) {
             double xPos = x * (i++) + offsetX;
+            xPos = addGap(gap, i, xPos);
             allSchemesAlice.add(new Scheme(filter, xPos, 2 * offsetY, x, x));
         }
 
         /// create Alice's transmissions '- \ / |' /////////////////////////////////////////////////////////////////////
-        integerPattern = generateIntegerPattern(new int[]{0, 1, 2, 3}, 10);
+        integerPattern = new int[]{0, 1, 2, 3, 0, 0, 1, 1, 2, 2, 3, 3};
         alicesTransmissions = new ArrayList<>();
         i = 0;
         for (int filter : integerPattern) {
             double xPos = x * (i++) + offsetX;
+            xPos = addGap(gap, i, xPos);
             alicesTransmissions.add(new Transmission(filter, xPos, 3 * offsetY, x, x));
         }
+
 
         /// create Alice's schemes /////////////////////////////////////////////////////////////////////////////////////
         allSchemesEve = new ArrayList<>();
@@ -114,34 +133,35 @@ public class Visualizer extends JButton {
         /// create Alice's bits ////////////////////////////////////////////////////////////////////////////////////////
         allBitsEve = new ArrayList<>();
 
-        /// create Bob's schemes ///////////////////////////////////////////////////////////////////////////////////////
-        allSchemesBob = new ArrayList<>();
-        integerPattern = generateIntegerPattern(new int[]{0, 0, 1, 1}, 10);
+        integerPattern = new int[]{-2, -2, -2, -2, 1, 1, 1, 1, 0, 0, 0, 0};
         i = 0;
         for (int filter : integerPattern) {
             double xPos = x * (i++) + offsetX;
+            xPos = addGap(gap, i, xPos);
+            allBitsEve.add(new Bit(filter, xPos, 6 * offsetY, x, x));
+        }
+
+        /// create Bob's schemes ///////////////////////////////////////////////////////////////////////////////////////
+        allSchemesBob = new ArrayList<>();
+        integerPattern = new int[]{0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0};
+        i = 0;
+        for (int filter : integerPattern) {
+            double xPos = x * (i++) + offsetX;
+            xPos = addGap(gap, i, xPos);
             allSchemesBob.add(new Scheme(filter, xPos, 7 * offsetY, x, x));
         }
 
         /// create Bob's bit-string ////////////////////////////////////////////////////////////////////////////////////
         allBitsBob = new ArrayList<>();
-        integerPattern = generateIntegerPattern(new int[]{0, 1}, 20);
+        integerPattern = new int[]{0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1};
         i = 0;
         for (int bit : integerPattern) {
             double xPos = x * (i++) + offsetX;
+            xPos = addGap(gap, i, xPos);
             allBitsBob.add(new Bit(bit, xPos, 8 * offsetY, x, x));
         }
-    }
 
-    private static int[] generateIntegerPattern(int[] pattern, int reps) {
-
-        int[] result = new int[pattern.length * reps];
-
-        for (int i = 0; i < reps; i++) {
-            System.arraycopy(pattern, 0, result, i * pattern.length, pattern.length);
-        }
-
-        return result;
+        highlighter = new Rectangle2D.Double(-100, offsetY, x, offsetY * 7 + boxWidth);
     }
 
     private void createAllRandom() {
@@ -151,7 +171,6 @@ public class Visualizer extends JButton {
         if (boxWidth > 36) {
             boxWidth = 36;
         }
-
         double x = boxWidth;
         double y = offsetY;
 
@@ -245,6 +264,13 @@ public class Visualizer extends JButton {
         }
     }
 
+    private double addGap(double gap, int i, double xPos) {
+        if (i > 4) {
+            xPos += gap;
+        }
+        return xPos;
+    }
+
     private void loadImages() {
         try {
             image = ImageIO.read(new File("universe.png"));
@@ -278,9 +304,7 @@ public class Visualizer extends JButton {
 
         drawHighlighter(g2d, false);
 
-        /// drawHeaders(g2d);
-
-        offsetY = getHeight() / 9;
+        /// TODO: include again drawHeaders(g2d);
     }
 
     private void drawNumberOfBits(Graphics2D g2d) {
@@ -294,14 +318,17 @@ public class Visualizer extends JButton {
 
         int indent = 30;
         g2d.setColor(MyColors.mySandLikeColor);
+
         g2d.drawImage(alice, indent, (int) (1.7 * offsetY), alice.getWidth() / 16, alice.getHeight() / 16, null, this);
         g2d.drawString("Alice", indent + 10, (int) (3 * offsetY));
-        g2d.drawImage(bob, indent, (int) (7.1 * offsetY), alice.getWidth() / 16, alice.getHeight() / 16, null, this);
-        g2d.drawString("Bob", indent + 14, (int) (8.38 * offsetY));
-        if (eavsdropping) {
+
+        if (eavesdropping) {
             g2d.drawImage(eve, 30, (int) (4.7 * offsetY), alice.getWidth() / 16, alice.getHeight() / 16, null, this);
             g2d.drawString("Eve", indent + 14, (int) (6 * offsetY));
         }
+
+        g2d.drawImage(bob, indent, (int) (7.1 * offsetY), alice.getWidth() / 16, alice.getHeight() / 16, null, this);
+        g2d.drawString("Bob", indent + 14, (int) (8.38 * offsetY));
     }
 
     private void drawHighlighter(Graphics2D g2d, boolean fill) {
@@ -326,7 +353,7 @@ public class Visualizer extends JButton {
         for (Transmission t : alicesTransmissions) {
             t.draw(g2d);
         }
-        if (eavsdropping) {
+        if (eavesdropping) {
 
             g2d.setColor(MyColors.mySandLikeColor);
             g2d.draw(new Rectangle2D.Double(10, 4 * offsetY - 10, getWidth() - 20, 2.64 * offsetY));
@@ -339,9 +366,10 @@ public class Visualizer extends JButton {
             for (Bit b : allBitsEve) {
                 b.draw(g2d);
             }
-            for (Transmission t : evesTransmissions) {
-                t.draw(g2d);
-            }
+            /// TODO: include again
+//            for (Transmission t : evesTransmissions) {
+//                t.draw(g2d);
+//            }
         }
 
         for (int i = 0; i < allSchemesBob.size(); i++) {
@@ -439,14 +467,14 @@ public class Visualizer extends JButton {
         switch (e.getKeyCode()) {
 
             case KeyEvent.VK_SPACE:
-                createAllRandom();
+                creation();
                 break;
             case KeyEvent.VK_UP:
                 numBits += 2;
                 if (numBits > 128) {
                     numBits = 128;
                 } else {
-                    createAllRandom();
+                    creation();
                 }
                 break;
             case KeyEvent.VK_DOWN:
@@ -454,7 +482,7 @@ public class Visualizer extends JButton {
                 if (numBits < 10) {
                     numBits = 10;
                 } else {
-                    createAllRandom();
+                    creation();
                 }
                 break;
             case KeyEvent.VK_ENTER:
@@ -466,14 +494,16 @@ public class Visualizer extends JButton {
             /// letter keys ////////////////////////////////////////////////////////////////////////////////////////////
             case KeyEvent.VK_4:
                 numBits = 42;
-                createAllRandom();
+                creation();
                 break;
+
             /// letter keys ////////////////////////////////////////////////////////////////////////////////////////////
             case KeyEvent.VK_D:
+                demoMode = !demoMode;
                 createAllPossibilities();
                 break;
             case KeyEvent.VK_E:
-                eavsdropping = !eavsdropping;
+                eavesdropping = !eavesdropping;
                 break;
             case KeyEvent.VK_H:
                 break;
@@ -485,7 +515,7 @@ public class Visualizer extends JButton {
                 } else {
                     numBits = 4;
                 }
-                createAllRandom();
+                creation();
                 break;
             case KeyEvent.VK_P:
                 break;
@@ -516,9 +546,8 @@ public class Visualizer extends JButton {
         SwingUtilities.invokeLater(() -> {
 
             JFrame f = new JFrame();
-            Visualizer v = new Visualizer();
+            Visualizer v = new Visualizer(f);
             f.add(v);
-            f.setTitle("BB 84 - Bennett-Brassard 1984");
             f.addWindowListener(new java.awt.event.WindowAdapter() {
                 @Override
                 public void windowClosing(WindowEvent windowEvent) {
