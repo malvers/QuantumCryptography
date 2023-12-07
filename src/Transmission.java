@@ -14,10 +14,12 @@ public class Transmission extends MyBox {
 
         Color color = g2d.getColor();
 
-        g2d.setColor(MyColors.myGray);
-        g2d.fill(this);
-        g2d.setColor(Color.LIGHT_GRAY);
-        g2d.draw(this);
+        if (transmission != -2) {
+            g2d.setColor(MyColors.myGray);
+            g2d.fill(this);
+            g2d.setColor(Color.LIGHT_GRAY);
+            g2d.draw(this);
+        }
 
         g2d.setColor(MyColors.myRed);
         double facY;

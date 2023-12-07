@@ -14,10 +14,12 @@ public class Scheme extends MyBox {
 
     protected void draw(Graphics2D g2d) {
 
-        g2d.setColor(backGroundColor);
-        g2d.fill(this);
-        g2d.setColor(Color.GRAY);
-        g2d.draw(this);
+        if( filter != -2 ) {
+            g2d.setColor(backGroundColor);
+            g2d.fill(this);
+            g2d.setColor(Color.GRAY);
+            g2d.draw(this);
+        }
 
         g2d.setColor(MyColors.myRed);
         double facY;
@@ -43,7 +45,7 @@ public class Scheme extends MyBox {
             oy = (height - (height / facY)) / 2;
             g2d.fill(new Double(x + ox, y + oy, width / facX, height / facY));
 
-        } else {
+        } else if( filter == 1 ){
 
             if (valid) {
                 g2d.setColor(MyColors.myGreen);

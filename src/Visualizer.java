@@ -16,8 +16,8 @@ public class Visualizer extends JButton {
     private BufferedImage image;
     private ArrayList<Bit> allBitsAlice;
     private ArrayList<Scheme> allSchemesAlice;
-    private ArrayList<Transmission> alicesTransmissions;
-    private ArrayList<Transmission> evesTransmissions;
+    private ArrayList<Transmission> allTransmissionsAlice;
+    private ArrayList<Transmission> allTransmissionsEve;
     private ArrayList<Scheme> allSchemesBob;
     private ArrayList<Scheme> allSchemesEve;
     private ArrayList<Bit> allBitsBob;
@@ -133,14 +133,14 @@ public class Visualizer extends JButton {
         double x = boxWidth;
         double y = offsetY;
 
-        int[] integerPattern;
+        int[] pattern;
         double gap = 0.0;
 
         /// create Alice's bits 0 | 1 //////////////////////////////////////////////////////////////////////////////////
         allBitsAlice = new ArrayList<>();
-        integerPattern = new int[]{0, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 1};
+        pattern = new int[]{0, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 1};
         int i = 0;
-        for (int bit : integerPattern) {
+        for (int bit : pattern) {
             double xPos = x * (i++) + offsetX;
             xPos = addGap(gap, i, xPos);
             allBitsAlice.add(new Bit(bit, xPos, y, x, x));
@@ -148,34 +148,53 @@ public class Visualizer extends JButton {
 
         /// create Alice's schemes 'x | +' /////////////////////////////////////////////////////////////////////////////
         allSchemesAlice = new ArrayList<>();
-        integerPattern = new int[]{0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1};
+        pattern = new int[]{0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1};
         i = 0;
-        for (int filter : integerPattern) {
+        for (int filter : pattern) {
             double xPos = x * (i++) + offsetX;
             xPos = addGap(gap, i, xPos);
             allSchemesAlice.add(new Scheme(filter, xPos, 2 * offsetY, x, x));
         }
 
         /// create Alice's transmissions '- \ / |' /////////////////////////////////////////////////////////////////////
-        integerPattern = new int[]{0, 1, 2, 3, 0, 0, 1, 1, 2, 2, 3, 3};
-        alicesTransmissions = new ArrayList<>();
+        pattern = new int[]{0, 1, 2, 3, 0, 0, 1, 1, 2, 2, 3, 3};
+        allTransmissionsAlice = new ArrayList<>();
         i = 0;
-        for (int filter : integerPattern) {
+        for (int filter : pattern) {
             double xPos = x * (i++) + offsetX;
             xPos = addGap(gap, i, xPos);
-            alicesTransmissions.add(new Transmission(filter, xPos, 3 * offsetY, x, x));
+            allTransmissionsAlice.add(new Transmission(filter, xPos, 3 * offsetY, x, x));
         }
 
+        /// TODO: implement --------------------------
 
-        /// create Alice's schemes /////////////////////////////////////////////////////////////////////////////////////
+        /// create Eve's schemes ///////////////////////////////////////////////////////////////////////////////////////
+        pattern = new int[]{-2, -2, -2, -2, 1, 1, 1, 1, 0, 0, 0, 0};
         allSchemesEve = new ArrayList<>();
-
-        /// create Alice's bits ////////////////////////////////////////////////////////////////////////////////////////
-        allBitsEve = new ArrayList<>();
-
-        integerPattern = new int[]{-2, -2, -2, -2, 1, 1, 1, 1, 0, 0, 0, 0};
         i = 0;
-        for (int filter : integerPattern) {
+        for (int scheme : pattern) {
+            double xPos = x * (i++) + offsetX;
+            xPos = addGap(gap, i, xPos);
+            Scheme s = new Scheme(scheme, xPos, 4 * offsetY, x, x);
+            s.setValidity(scheme == s.filter);
+            allSchemesEve.add(s);
+        }
+
+        /// create Eve's transmissions /////////////////////////////////////////////////////////////////////////////////
+        pattern = new int[]{-2, -2, -2, -2, 1, 1, 1, 1, 0, 0, 0, 0};
+        allTransmissionsEve = new ArrayList<>();
+        i = 0;
+        for (int transmission : pattern) {
+            double xPos = x * (i++) + offsetX;
+            xPos = addGap(gap, i, xPos);
+            allTransmissionsEve.add(new Transmission(transmission, xPos, 5 * offsetY, x, x));
+        }
+
+        /// create Eve's bits //////////////////////////////////////////////////////////////////////////////////////////
+        allBitsEve = new ArrayList<>();
+        pattern = new int[]{-2, -2, -2, -2, 1, 1, 1, 1, 0, 0, 0, 0};
+        i = 0;
+        for (int filter : pattern) {
             double xPos = x * (i++) + offsetX;
             xPos = addGap(gap, i, xPos);
             allBitsEve.add(new Bit(filter, xPos, 6 * offsetY, x, x));
@@ -183,19 +202,21 @@ public class Visualizer extends JButton {
 
         /// create Bob's schemes ///////////////////////////////////////////////////////////////////////////////////////
         allSchemesBob = new ArrayList<>();
-        integerPattern = new int[]{0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0};
+        pattern = new int[]{0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0};
         i = 0;
-        for (int filter : integerPattern) {
+        for (int filter : pattern) {
             double xPos = x * (i++) + offsetX;
             xPos = addGap(gap, i, xPos);
-            allSchemesBob.add(new Scheme(filter, xPos, 7 * offsetY, x, x));
+            Scheme s = new Scheme(filter, xPos, 7 * offsetY, x, x);
+            s.setValidity(filter == s.filter);
+            allSchemesBob.add(s);
         }
 
         /// create Bob's bit-string ////////////////////////////////////////////////////////////////////////////////////
         allBitsBob = new ArrayList<>();
-        integerPattern = new int[]{0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1};
+        pattern = new int[]{0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1};
         i = 0;
-        for (int bit : integerPattern) {
+        for (int bit : pattern) {
             double xPos = x * (i++) + offsetX;
             xPos = addGap(gap, i, xPos);
             allBitsBob.add(new Bit(bit, xPos, 8 * offsetY, x, x));
@@ -232,7 +253,7 @@ public class Visualizer extends JButton {
         }
 
         /// create Alice's transmissions ///////////////////////////////////////////////////////////////////////////////
-        alicesTransmissions = new ArrayList<>();
+        allTransmissionsAlice = new ArrayList<>();
         for (int i = 0; i < numBits; i++) {
 
             double xPos = x * i + offsetX;
@@ -246,14 +267,17 @@ public class Visualizer extends JButton {
             } else if (allBitsAlice.get(i).theBit == 1 && allSchemesAlice.get(i).filter == 1) {
                 theCase = 3;
             }
-            alicesTransmissions.add(new Transmission(theCase, xPos, 3 * offsetY, x, x));
+            allTransmissionsAlice.add(new Transmission(theCase, xPos, 3 * offsetY, x, x));
         }
 
         /// create Eve's schemes ///////////////////////////////////////////////////////////////////////////////////////
         allSchemesEve = new ArrayList<>();
         for (int i = 0; i < numBits; i++) {
             double xPos = x * i + offsetX;
-            allSchemesEve.add(new Scheme(random.nextInt(2), xPos, 4 * offsetY, x, x));
+            int r = random.nextInt(2);
+            Scheme s = new Scheme(r, xPos, 4 * offsetY, x, x);
+            s.setValidity(r == s.filter);
+            allSchemesEve.add(s);
         }
 
         /// create Eve's bit-string ////////////////////////////////////////////////////////////////////////////////////
@@ -268,7 +292,7 @@ public class Visualizer extends JButton {
         }
 
         /// create Eve's transmissions /////////////////////////////////////////////////////////////////////////////////
-        evesTransmissions = new ArrayList<>();
+        allTransmissionsEve = new ArrayList<>();
         for (int i = 0; i < numBits; i++) {
 
             double xPos = x * i + offsetX;
@@ -282,14 +306,17 @@ public class Visualizer extends JButton {
             } else if (allBitsEve.get(i).theBit == 1 && allSchemesAlice.get(i).filter == 1) {
                 theCase = 3;
             }
-            evesTransmissions.add(new Transmission(theCase, xPos, 6 * offsetY, x, x));
+            allTransmissionsEve.add(new Transmission(theCase, xPos, 6 * offsetY, x, x));
         }
 
         /// create Bob's schemes ///////////////////////////////////////////////////////////////////////////////////////
         allSchemesBob = new ArrayList<>();
         for (int i = 0; i < numBits; i++) {
             double xPos = x * i + offsetX;
-            allSchemesBob.add(new Scheme(random.nextInt(2), xPos, 7 * offsetY, x, x));
+            int r = random.nextInt(2);
+            Scheme s = new Scheme(r, xPos, 7 * offsetY, x, x);
+            s.setValidity(r == s.filter);
+            allSchemesBob.add(s);
         }
 
         /// create Bob's bit-string ////////////////////////////////////////////////////////////////////////////////////
@@ -390,7 +417,7 @@ public class Visualizer extends JButton {
         for (Scheme s : allSchemesAlice) {
             s.draw(g2d);
         }
-        for (Transmission t : alicesTransmissions) {
+        for (Transmission t : allTransmissionsAlice) {
             t.draw(g2d);
         }
         if (eavesDropping) {
@@ -400,21 +427,18 @@ public class Visualizer extends JButton {
 
             for (int i = 0; i < allSchemesEve.size(); i++) {
                 Scheme s = allSchemesEve.get(i);
-                s.setValidity(allSchemesAlice.get(i).filter == s.filter);
                 allSchemesEve.get(i).draw(g2d);
             }
             for (Bit b : allBitsEve) {
                 b.draw(g2d);
             }
-            /// TODO: include again
-//            for (Transmission t : evesTransmissions) {
-//                t.draw(g2d);
-//            }
+            for (Transmission t : allTransmissionsEve) {
+                t.draw(g2d);
+            }
         }
 
         for (int i = 0; i < allSchemesBob.size(); i++) {
             Scheme s = allSchemesBob.get(i);
-            s.setValidity(allSchemesAlice.get(i).filter == s.filter);
             allSchemesBob.get(i).draw(g2d);
         }
 
