@@ -471,11 +471,9 @@ public class Visualizer extends JButton {
                 t.draw(g2d);
             }
         }
-
         for (Scheme s : allSchemesBob) {
             s.draw(g2d);
         }
-
         for (Bit b : allBitsBob) {
             b.draw(g2d);
         }
@@ -527,7 +525,7 @@ public class Visualizer extends JButton {
         }
         int percent1 = (count1 * 100) / list.size();
         int percent0 = (count0 * 100) / list.size();
-        String str = percent1 + " % '+' - " + (100 - percent1) + " % 'x'";
+        String str = percent1 + " % '+' and " + (100 - percent1) + " % 'x'";
 
         if (countArbitrary > 0) {
             str += " - may be wrong " + (100 - percent1 - percent0) + " % '1|0'";
@@ -561,7 +559,7 @@ public class Visualizer extends JButton {
         int percent2 = (count2 * 100) / list.size();
         int percent3 = (count3 * 100) / list.size();
         int percent_1 = (count_1 * 100) / list.size();
-        String str = percent0 + " % '|' - " + percent1 + " % '-' " + percent2 + " % '\\' " + percent3 + " % '/' " + percent_1 + " % '|-/\\' ";
+        String str = percent0 + " % '|' and " + percent1 + " % '-' " + percent2 + " % '\\' " + percent3 + " % '/' " + percent_1 + " % '|-/\\' ";
 
         return str;
     }
@@ -582,7 +580,7 @@ public class Visualizer extends JButton {
         }
         int percent1 = (count1 * 100) / list.size();
         int percent0 = (count0 * 100) / list.size();
-        String str = percent1 + " % '1' - " + percent0 + " % '0'";
+        String str = percent1 + " % '1' and " + percent0 + " % '0'";
 
         if (countArbitrary > 0) {
             str += " - may be wrong " + (100 - percent1 - percent0) + " % '1|0'";
