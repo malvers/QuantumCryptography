@@ -1,11 +1,11 @@
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 
-public class Transmission extends MyBox {
+public class Polarisation extends MyBox {
 
     protected final int transmission;
 
-    public Transmission(int theCase, double x, double y, double w, double h) {
+    public Polarisation(int theCase, double x, double y, double w, double h) {
         super(x, y, w, h);
         transmission = theCase;
     }

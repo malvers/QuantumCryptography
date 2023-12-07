@@ -17,8 +17,8 @@ public class Visualizer extends JButton {
     private BufferedImage image;
     private ArrayList<Bit> allBitsAlice;
     private ArrayList<Scheme> allSchemesAlice;
-    private ArrayList<Transmission> allTransmissionsAlice;
-    private ArrayList<Transmission> allTransmissionsEve;
+    private ArrayList<Polarisation> allPolarizationsAlice;
+    private ArrayList<Polarisation> allPolarizationsEve;
     private ArrayList<Scheme> allSchemesBob;
     private ArrayList<Scheme> allSchemesEve;
     private ArrayList<Bit> allBitsBob;
@@ -42,9 +42,7 @@ public class Visualizer extends JButton {
      */
     public Visualizer(JFrame f) {
 
-        Thread myHook = new Thread(() -> {
-            writeSettings();
-        });
+        Thread myHook = new Thread(() -> writeSettings());
         Runtime.getRuntime().addShutdownHook(myHook);
 
         loadImages();
@@ -166,15 +164,15 @@ public class Visualizer extends JButton {
             allSchemesAlice.add(new Scheme(filter, xPos + gap, 2 * offsetY, x, x));
         }
 
-        /// create Alice's transmissions '- \ / |' /////////////////////////////////////////////////////////////////////
+        /// create Alice's polarizations '- \ / |' /////////////////////////////////////////////////////////////////////
         pattern = new int[]{0, 1, 2, 3, 0, 0, 1, 1, 0, 1, 2, 3, 0, 0, 2, 2, 1, 1, 3, 3};
-        allTransmissionsAlice = new ArrayList<>();
+        allPolarizationsAlice = new ArrayList<>();
         i = 0;
         gap = 0;
         for (int filter : pattern) {
             double xPos = x * (i++) + offsetX;
             addGaps(i);
-            allTransmissionsAlice.add(new Transmission(filter, xPos + gap, 3 * offsetY, x, x));
+            allPolarizationsAlice.add(new Polarisation(filter, xPos + gap, 3 * offsetY, x, x));
         }
 
 /////// Eve ////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -202,17 +200,17 @@ public class Visualizer extends JButton {
             addGaps(i);
             allBitsEve.add(new Bit(filter, xPos + gap, 5 * offsetY, x, x));
         }
-        /// create Eve's transmissions /////////////////////////////////////////////////////////////////////////////////
+        /// create Eve's polarizations /////////////////////////////////////////////////////////////////////////////////
         pattern = new int[]{-2, -2, -2, -2, -2, -2, -2, -2, 0, 1, 2, 3, -1, -1, -1, -1, -1, -1, -1, -1};
-        allTransmissionsEve = new ArrayList<>();
+        allPolarizationsEve = new ArrayList<>();
         i = 0;
         gap = 0;
-        for (int transmission : pattern) {
+        for (int polarization : pattern) {
             double xPos = x * (i++) + offsetX;
             addGaps(i);
-            Transmission t = new Transmission(transmission, xPos + gap, 6 * offsetY, x, x);
+            Polarisation t = new Polarisation(polarization, xPos + gap, 6 * offsetY, x, x);
 //            t.set
-            allTransmissionsEve.add(t);
+            allPolarizationsEve.add(t);
         }
 
 
@@ -243,8 +241,6 @@ public class Visualizer extends JButton {
         }
 
         highlighter = new Rectangle2D.Double(offsetX, offsetY, x, offsetY * 7 + boxWidth);
-//        int num = allBitsAlice.size();
-//        Bit bit = allBitsAlice.get(num - 1);
 
         toolTip = new Rectangle2D.Double(offsetX, boxWidth / 2.0, getWidth() - offsetX - boxWidth, boxWidth);
     }
@@ -276,8 +272,8 @@ public class Visualizer extends JButton {
             allSchemesAlice.add(new Scheme(random.nextInt(2), xPos, 2 * offsetY, x, x));
         }
 
-        /// create Alice's transmissions ///////////////////////////////////////////////////////////////////////////////
-        allTransmissionsAlice = new ArrayList<>();
+        /// create Alice's polarizations ///////////////////////////////////////////////////////////////////////////////
+        allPolarizationsAlice = new ArrayList<>();
         for (int i = 0; i < numBits; i++) {
 
             double xPos = x * i + offsetX;
@@ -291,7 +287,7 @@ public class Visualizer extends JButton {
             } else if (allBitsAlice.get(i).theBit == 1 && allSchemesAlice.get(i).filter == 1) {
                 theCase = 3;
             }
-            allTransmissionsAlice.add(new Transmission(theCase, xPos, 3 * offsetY, x, x));
+            allPolarizationsAlice.add(new Polarisation(theCase, xPos, 3 * offsetY, x, x));
         }
 
         /// create Eve's schemes ///////////////////////////////////////////////////////////////////////////////////////
@@ -315,8 +311,8 @@ public class Visualizer extends JButton {
             allBitsEve.add(new Bit(bit, xPos, 5 * offsetY, x, x));
         }
 
-        /// create Eve's transmissions /////////////////////////////////////////////////////////////////////////////////
-        allTransmissionsEve = new ArrayList<>();
+        /// create Eve's polarizations /////////////////////////////////////////////////////////////////////////////////
+        allPolarizationsEve = new ArrayList<>();
         for (int i = 0; i < numBits; i++) {
 
             double xPos = x * i + offsetX;
@@ -330,7 +326,7 @@ public class Visualizer extends JButton {
             } else if (allBitsEve.get(i).theBit == 1 && allSchemesAlice.get(i).filter == 1) {
                 theCase = 3;
             }
-            allTransmissionsEve.add(new Transmission(theCase, xPos, 6 * offsetY, x, x));
+            allPolarizationsEve.add(new Polarisation(theCase, xPos, 6 * offsetY, x, x));
         }
 
         /// create Bob's schemes ///////////////////////////////////////////////////////////////////////////////////////
@@ -457,7 +453,7 @@ public class Visualizer extends JButton {
         for (Scheme s : allSchemesAlice) {
             s.draw(g2d);
         }
-        for (Transmission t : allTransmissionsAlice) {
+        for (Polarisation t : allPolarizationsAlice) {
             t.draw(g2d);
         }
         if (eavesDropping) {
@@ -471,14 +467,13 @@ public class Visualizer extends JButton {
             for (Bit b : allBitsEve) {
                 b.draw(g2d);
             }
-            for (Transmission t : allTransmissionsEve) {
+            for (Polarisation t : allPolarizationsEve) {
                 t.draw(g2d);
             }
         }
 
-        for (int i = 0; i < allSchemesBob.size(); i++) {
-            Scheme s = allSchemesBob.get(i);
-            allSchemesBob.get(i).draw(g2d);
+        for (Scheme s : allSchemesBob) {
+            s.draw(g2d);
         }
 
         for (Bit b : allBitsBob) {
@@ -495,16 +490,43 @@ public class Visualizer extends JButton {
         String str;
 
         str = getPercentSchemes(allSchemesAlice);
-        g2d.drawString("Alice's schemes - " + str, offsetX, (int) (2 * offsetY - upShiftHeader));
+        g2d.drawString("Alice's schemes: " + str, offsetX, (int) (2 * offsetY - upShiftHeader));
+        str = getPercentPolarizations(allPolarizationsAlice);
+        g2d.drawString("Polarizations: - " + str, offsetX, (int) (3 * offsetY - upShiftHeader));
         str = getPercentSchemes(allSchemesBob);
-        g2d.drawString("Bob's schemes - " + str, offsetX, (int) (7 * offsetY - upShiftHeader));
+        g2d.drawString("Bob's schemes: " + str, offsetX, (int) (7 * offsetY - upShiftHeader));
         str = getPercentBitString(allBitsAlice);
         g2d.drawString("Alice's random bit-string - " + str, offsetX, (int) (offsetY - upShiftHeader));
         str = getPercentBitString(allBitsBob);
-        g2d.drawString("Bob's bit-string - " + str, offsetX, (int) (8 * offsetY - upShiftHeader));
+        g2d.drawString("Bob's bit-string: " + str, offsetX, (int) (8 * offsetY - upShiftHeader));
     }
 
     public String getPercentSchemes(ArrayList<Scheme> list) {
+
+        int count0 = 0;
+        int count1 = 0;
+        int countArbitrary = 0;
+        for (Scheme b : list) {
+            if (b.filter == 1) {
+                count1++;
+            } else if (!b.valid) {
+                countArbitrary++;
+            } else if (b.filter == 0) {
+                count0++;
+            }
+        }
+        int percent1 = (count1 * 100) / list.size();
+        int percent0 = (count0 * 100) / list.size();
+        String str = percent1 + " % '+' - " + (100 - percent1) + " % 'x'";
+
+        if (countArbitrary > 0) {
+            str += " - may be wrong " + (100 - percent1 - percent0) + " %";
+        }
+
+        return str;
+    }
+
+    public String getPercentPolarizations(ArrayList<Scheme> list) {
 
         int count0 = 0;
         int count1 = 0;
