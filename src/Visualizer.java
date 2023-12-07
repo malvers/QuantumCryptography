@@ -122,7 +122,7 @@ public class Visualizer extends JButton {
     }
 
     private void creation() {
-        if (demoMode == true) {
+        if (demoMode) {
             createAllPossibilities();
         } else {
             createAllRandom();
@@ -243,8 +243,8 @@ public class Visualizer extends JButton {
         }
 
         highlighter = new Rectangle2D.Double(offsetX, offsetY, x, offsetY * 7 + boxWidth);
-        int num = allBitsAlice.size();
-        Bit bit = allBitsAlice.get(num - 1);
+//        int num = allBitsAlice.size();
+//        Bit bit = allBitsAlice.get(num - 1);
 
         toolTip = new Rectangle2D.Double(offsetX, boxWidth / 2.0, getWidth() - offsetX - boxWidth, boxWidth);
     }
@@ -465,9 +465,8 @@ public class Visualizer extends JButton {
             g2d.setColor(MyColors.mySandLikeColor);
             g2d.draw(new Rectangle2D.Double(10, 4 * offsetY - 10, getWidth() - 20, 2.64 * offsetY));
 
-            for (int i = 0; i < allSchemesEve.size(); i++) {
-                Scheme s = allSchemesEve.get(i);
-                allSchemesEve.get(i).draw(g2d);
+            for (Scheme s : allSchemesEve) {
+                s.draw(g2d);
             }
             for (Bit b : allBitsEve) {
                 b.draw(g2d);
