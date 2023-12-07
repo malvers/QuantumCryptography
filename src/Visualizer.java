@@ -572,7 +572,6 @@ public class Visualizer extends JButton {
                 highlighter.x = -100;
                 break;
             case KeyEvent.VK_W:
-                writeSettings();
                 System.exit(0);
                 break;
         }
@@ -595,16 +594,6 @@ public class Visualizer extends JButton {
             JFrame f = new JFrame();
             Visualizer v = new Visualizer(f);
             f.add(v);
-            f.addWindowListener(new java.awt.event.WindowAdapter() {
-                @Override
-                public void windowClosing(WindowEvent windowEvent) {
-                    v.writeSettings();
-                }
-
-                @Override
-                public void windowClosed(WindowEvent windowEvent) {
-                }
-            });
             f.setSize(initialWindowWidth, initialWindowHeight);
             f.setLocation(0, 0);
             f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
