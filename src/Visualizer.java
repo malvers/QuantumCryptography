@@ -4,12 +4,12 @@ import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Random;
 
 public class Visualizer extends JButton {
+
     private static final int initialWindowHeight = 800;
     private static final int initialWindowWidth = 1700;
     private Rectangle2D.Double highlighter;
@@ -27,7 +27,7 @@ public class Visualizer extends JButton {
     private BufferedImage alice;
     private BufferedImage bob;
     private BufferedImage eve;
-    private boolean eavesdropping = false;
+    private boolean eavesDropping = false;
     private double boxWidth;
     private int numBits = 42;
     private boolean demoMode = false;
@@ -37,6 +37,11 @@ public class Visualizer extends JButton {
      */
     public Visualizer(JFrame f) {
 
+        Thread myHook = new Thread(() -> {
+            writeSettings();
+        });
+        Runtime.getRuntime().addShutdownHook(myHook);
+
         loadImages();
 
         f.setTitle("BB 84 - Bennett-Brassard 1984");
@@ -44,9 +49,7 @@ public class Visualizer extends JButton {
         addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
-                offsetY = getHeight() / 9.0;
-                creation();
-                repaint();
+                handleComponentEvents();
             }
         });
 
@@ -71,7 +74,44 @@ public class Visualizer extends JButton {
             }
         });
 
+        readSettings();
+
         creation();
+    }
+
+    private void writeSettings() {
+
+        System.out.println("writeSettings ...");
+        try {
+            String uh = System.getProperty("user.home");
+            FileOutputStream f = new FileOutputStream(uh + "/QuantumCryptography.bin");
+            ObjectOutputStream os = new ObjectOutputStream(f);
+
+            os.writeBoolean(eavesDropping);
+            os.writeBoolean(demoMode);
+
+            os.close();
+            f.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void readSettings() {
+
+        try {
+            String uh = System.getProperty("user.home");
+            FileInputStream f = new FileInputStream(uh + "/QuantumCryptography.bin");
+            ObjectInputStream os = new ObjectInputStream(f);
+
+            eavesDropping = os.readBoolean();
+            demoMode = os.readBoolean();
+
+            os.close();
+            f.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void creation() {
@@ -322,7 +362,7 @@ public class Visualizer extends JButton {
         g2d.drawImage(alice, indent, (int) (1.7 * offsetY), alice.getWidth() / 16, alice.getHeight() / 16, null, this);
         g2d.drawString("Alice", indent + 10, (int) (3 * offsetY));
 
-        if (eavesdropping) {
+        if (eavesDropping) {
             g2d.drawImage(eve, 30, (int) (4.7 * offsetY), alice.getWidth() / 16, alice.getHeight() / 16, null, this);
             g2d.drawString("Eve", indent + 14, (int) (6 * offsetY));
         }
@@ -353,7 +393,7 @@ public class Visualizer extends JButton {
         for (Transmission t : alicesTransmissions) {
             t.draw(g2d);
         }
-        if (eavesdropping) {
+        if (eavesDropping) {
 
             g2d.setColor(MyColors.mySandLikeColor);
             g2d.draw(new Rectangle2D.Double(10, 4 * offsetY - 10, getWidth() - 20, 2.64 * offsetY));
@@ -459,7 +499,14 @@ public class Visualizer extends JButton {
         g2d.drawImage(image, 0, 0, getWidth(), getHeight(), Color.BLACK, this);
     }
 
-    /// handle key and mouse events ////////////////////////////////////////////////////////////////////////////////////
+    /// handle events //////////////////////////////////////////////////////////////////////////////////////////////////
+
+    private void handleComponentEvents() {
+        offsetY = getHeight() / 9.0;
+        creation();
+        repaint();
+    }
+
     private void handleKeyPress(KeyEvent e) {
 
 //        System.out.println("code: " + e.getKeyCode());
@@ -503,7 +550,7 @@ public class Visualizer extends JButton {
                 createAllPossibilities();
                 break;
             case KeyEvent.VK_E:
-                eavesdropping = !eavesdropping;
+                eavesDropping = !eavesDropping;
                 break;
             case KeyEvent.VK_H:
                 break;
@@ -525,11 +572,11 @@ public class Visualizer extends JButton {
                 highlighter.x = -100;
                 break;
             case KeyEvent.VK_W:
+                writeSettings();
                 System.exit(0);
                 break;
         }
         repaint();
-
     }
 
     private void handleMouse(MouseEvent e) {
@@ -551,14 +598,11 @@ public class Visualizer extends JButton {
             f.addWindowListener(new java.awt.event.WindowAdapter() {
                 @Override
                 public void windowClosing(WindowEvent windowEvent) {
-
+                    v.writeSettings();
                 }
 
                 @Override
                 public void windowClosed(WindowEvent windowEvent) {
-                    // This will be called when the window is closed
-                    System.out.println("Window is closed");
-                    // Add your custom logic here
                 }
             });
             f.setSize(initialWindowWidth, initialWindowHeight);
