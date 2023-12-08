@@ -126,6 +126,7 @@ public class Visualizer extends JButton {
         } else {
             createAllRandom();
         }
+        handleLeftRight(0);
     }
 
     /// create all bits and filters  ///////////////////////////////////////////////////////////////////////////////////
@@ -248,6 +249,8 @@ public class Visualizer extends JButton {
     }
 
     private void createAllRandom() {
+
+        numberOfBits = 42;
 
         Random random = new Random();
         bitBoxWidth = 1500.0 / numberOfBits;
@@ -396,9 +399,9 @@ public class Visualizer extends JButton {
 
         drawPhotonStuff(g2d);
 
-        if (showHighLighter) {
-            drawHighlighter(g2d, false);
-        }
+//        if (showHighLighter) {
+//            drawHighlighter(g2d, false);
+//        }
 
         if (!demoMode) {
             drawHeaders(g2d);
@@ -441,12 +444,10 @@ public class Visualizer extends JButton {
                 textColor = MyColors.mySandLikeColor;
             }
             g2d.fill(highlighter);
-//            if (demoMode) {
             g2d.fill(toolTip);
             g2d.setFont(new Font("Arial", Font.PLAIN, (int) (bitBoxWidth / 2)));
             g2d.setColor(textColor);
             g2d.drawString(toolTipText, offsetX + 6, (int) (toolTip.y + bitBoxWidth - 12));
-//            }
         } else {
             g2d.setColor(MyColors.myLightGray);
             g2d.draw(highlighter);
@@ -514,6 +515,14 @@ public class Visualizer extends JButton {
         g2d.drawString("Alice's random bit-string: " + str, offsetX, (int) (offsetY - upShiftHeader));
         str = getPercentBit(allBitsBob);
         g2d.drawString("Bob's bit-string: " + str, offsetX, (int) (8 * offsetY - upShiftHeader));
+    }
+
+    private void drawBackgroundImage(Graphics2D g2d) {
+
+        if (image == null) {
+            return;
+        }
+        g2d.drawImage(image, 0, 0, getWidth(), getHeight(), Color.BLACK, this);
     }
 
     public String getPercentSchemes(ArrayList<Scheme> list) {
@@ -595,12 +604,45 @@ public class Visualizer extends JButton {
         return str;
     }
 
-    private void drawBackgroundImage(Graphics2D g2d) {
+    private String createExplanations() {
 
-        if (image == null) {
-            return;
+        String str = "";
+
+        str += "Alice sends '" + allBitsAlice.get(highlighterBitPosition).theBit + "' ";
+
+        int fia = allSchemesAlice.get(highlighterBitPosition).filter;
+        if (fia == 0) {
+            str += "using the '+' scheme. ";
+        } else {
+            str += "using the 'x' scheme. ";
         }
-        g2d.drawImage(image, 0, 0, getWidth(), getHeight(), Color.BLACK, this);
+        int po = allPolarizationsAlice.get(highlighterBitPosition).polarization;
+        if (po == 0) {
+            str += "The polarization is '|'. ";
+        } else if (po == 1) {
+            str += "The polarization is '-'. ";
+        } else if (po == 2) {
+            str += "The polarization is '\\'. ";
+        } else if (po == 3) {
+            str += "The polarization is '/'. ";
+        }
+        if (eavesDropping) {
+
+        }
+        int fib = allSchemesBob.get(highlighterBitPosition).filter;
+        str += "Bob uses the ";
+        if (fia == fib) {
+            str += "right ";
+        } else {
+            str += "wrong ";
+        }
+        if (fib == 0) {
+            str += "'+' scheme. ";
+        } else {
+            str += "'x' scheme. ";
+        }
+
+        return str;
     }
 
     /// handle events //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -697,8 +739,9 @@ public class Visualizer extends JButton {
         highlighter.x = allBitsAlice.get(highlighterBitPosition).x;
         if (demoMode) {
             toolTipText = explanations.getLine(highlighterBitPosition);
+        } else {
+            toolTipText = createExplanations();
         }
-
     }
 
     private void handleMouse(MouseEvent e) {
