@@ -37,6 +37,7 @@ public class Visualizer extends JButton {
     private Rectangle2D.Double highlighter;
     private int highlighterBitPosition = 0;
     private boolean showHighLighter = false;
+    private boolean drawHeaders = true;
 
     /**
      * A program to visualize the BB84 algorithm
@@ -95,6 +96,7 @@ public class Visualizer extends JButton {
 
             os.writeBoolean(eavesDropping);
             os.writeBoolean(demoMode);
+            os.writeBoolean(drawHeaders);
 
             os.close();
             f.close();
@@ -112,6 +114,7 @@ public class Visualizer extends JButton {
 
             eavesDropping = os.readBoolean();
             demoMode = os.readBoolean();
+            drawHeaders = os.readBoolean();
 
             os.close();
             f.close();
@@ -122,16 +125,17 @@ public class Visualizer extends JButton {
 
     private void creation() {
         if (demoMode) {
-            createAllPossibilities();
+            createAllDemoCases();
         } else {
             createAllRandom();
         }
-        handleLeftRight(0);
+        updateToolTip(0);
     }
 
     /// create all bits and filters  ///////////////////////////////////////////////////////////////////////////////////
-    private void createAllPossibilities() {
+    private void createAllDemoCases() {
 
+        drawHeaders = false;
         bitBoxWidth = 1500.0 / numberOfBits;
         if (bitBoxWidth > 36) {
             bitBoxWidth = 36;
@@ -394,16 +398,12 @@ public class Visualizer extends JButton {
         drawAliceBobEve(g2d);
 
         if (showHighLighter) {
-            drawHighlighter(g2d, true);
+            drawHighlighter(g2d);
         }
 
         drawPhotonStuff(g2d);
 
-//        if (showHighLighter) {
-//            drawHighlighter(g2d, false);
-//        }
-
-        if (!demoMode) {
+        if (drawHeaders) {
             drawHeaders(g2d);
         }
     }
@@ -432,26 +432,21 @@ public class Visualizer extends JButton {
         g2d.drawString("Bob", indent + 14, (int) (8.38 * offsetY));
     }
 
-    private void drawHighlighter(Graphics2D g2d, boolean fill) {
+    private void drawHighlighter(Graphics2D g2d) {
 
         Color textColor = MyColors.myDarkGray;
-        if (fill) {
-            g2d.setColor(MyColors.myGreen);
-            if (toolTipText.contains("Contradiction") ||
-                    toolTipText.contains("'0' or a '1'") ||
-                    allBitsBob.get(highlighterBitPosition).theBit == -1) {
-                g2d.setColor(MyColors.myRed);
-                textColor = MyColors.mySandLikeColor;
-            }
-            g2d.fill(highlighter);
-            g2d.fill(toolTip);
-            g2d.setFont(new Font("Arial", Font.PLAIN, (int) (bitBoxWidth / 2)));
-            g2d.setColor(textColor);
-            g2d.drawString(toolTipText, offsetX + 6, (int) (toolTip.y + bitBoxWidth - 12));
-        } else {
-            g2d.setColor(MyColors.myLightGray);
-            g2d.draw(highlighter);
+        g2d.setColor(MyColors.myGreen);
+        if (toolTipText.contains("Contradiction") ||
+                toolTipText.contains("'0' or a '1'") ||
+                allBitsBob.get(highlighterBitPosition).theBit == -1) {
+            g2d.setColor(MyColors.myRed);
+            textColor = MyColors.mySandLikeColor;
         }
+        g2d.fill(highlighter);
+        g2d.fill(toolTip);
+        g2d.setFont(new Font("Arial", Font.PLAIN, (int) (bitBoxWidth / 2)));
+        g2d.setColor(textColor);
+        g2d.drawString(toolTipText, offsetX + 6, (int) (toolTip.y + bitBoxWidth - 12));
     }
 
     private void drawPhotonStuff(Graphics2D g2d) {
@@ -627,7 +622,24 @@ public class Visualizer extends JButton {
             str += "The polarization is '/'. ";
         }
         if (eavesDropping) {
-
+            int fie = allSchemesEve.get(highlighterBitPosition).filter;
+            str += "Eve uses the ";
+            if (fia == fie) {
+                str += "right ";
+            } else {
+                str += "wrong ";
+            }
+            if (fie == 0) {
+                str += "'+' scheme ";
+            } else {
+                str += "'x' scheme ";
+            }
+            int tb = allBitsEve.get(highlighterBitPosition).theBit;
+            if (tb < 0) {
+                str += "and gets a '0 or a 1'. ";
+            } else {
+                str += "and gets a '" + tb + "'. ";
+            }
         }
         int fib = allSchemesBob.get(highlighterBitPosition).filter;
         str += "Bob uses the ";
@@ -637,9 +649,15 @@ public class Visualizer extends JButton {
             str += "wrong ";
         }
         if (fib == 0) {
-            str += "'+' scheme. ";
+            str += "'+' scheme ";
         } else {
-            str += "'x' scheme. ";
+            str += "'x' scheme ";
+        }
+        int tb = allBitsBob.get(highlighterBitPosition).theBit;
+        if (tb < 0) {
+            str += "and gets a '0 or a 1'.";
+        } else {
+            str += "and gets a '" + tb + "'.";
         }
 
         return str;
@@ -682,10 +700,10 @@ public class Visualizer extends JButton {
             case KeyEvent.VK_ENTER:
                 break;
             case KeyEvent.VK_LEFT:
-                handleLeftRight(-1);
+                updateToolTip(-1);
                 break;
             case KeyEvent.VK_RIGHT:
-                handleLeftRight(+1);
+                updateToolTip(+1);
                 break;
 
             /// number keys ////////////////////////////////////////////////////////////////////////////////////////////
@@ -701,10 +719,12 @@ public class Visualizer extends JButton {
                 break;
             case KeyEvent.VK_E:
                 eavesDropping = !eavesDropping;
+                updateToolTip(0);
                 break;
             case KeyEvent.VK_H:
-                break;
-            case KeyEvent.VK_I:
+                if (!demoMode) {
+                    drawHeaders = !drawHeaders;
+                }
                 break;
             case KeyEvent.VK_M:
                 if (e.isShiftDown()) {
@@ -714,10 +734,6 @@ public class Visualizer extends JButton {
                 }
                 creation();
                 break;
-            case KeyEvent.VK_P:
-                break;
-            case KeyEvent.VK_T:
-                break;
             case KeyEvent.VK_W:
                 System.exit(0);
                 break;
@@ -725,7 +741,7 @@ public class Visualizer extends JButton {
         repaint();
     }
 
-    private void handleLeftRight(int dir) {
+    private void updateToolTip(int dir) {
 
         highlighterBitPosition += dir;
 
