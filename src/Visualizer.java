@@ -13,7 +13,6 @@ public class Visualizer extends JButton {
     private static final int initialWindowHeight = 800;
     private static final int initialWindowWidth = 1700;
     private final ReadExplanations explanations;
-    private Rectangle2D.Double highlighter;
     private BufferedImage image;
     private ArrayList<Bit> allBitsAlice;
     private ArrayList<Scheme> allSchemesAlice;
@@ -29,20 +28,22 @@ public class Visualizer extends JButton {
     private BufferedImage bob;
     private BufferedImage eve;
     private boolean eavesDropping = false;
-    private double boxWidth;
-    private int numBits = 42;
+    private double bitBoxWidth;
+    private int numberOfBits = 42;
     private boolean demoMode = false;
-    private double gap = 6;
+    private double gapForDemo = 6;
     private Rectangle2D.Double toolTip;
-    private String toolTipText = "The demo mode shows all possible outcomes ...";
-    private int highlighterPosition = 0;
+    private String toolTipText = "";
+    private Rectangle2D.Double highlighter;
+    private int highlighterBitPosition = 0;
+    private boolean showHighLighter = false;
 
     /**
      * A program to visualize the BB84 algorithm
      */
     public Visualizer(JFrame f) {
 
-        Thread myHook = new Thread(() -> writeSettings());
+        Thread myHook = new Thread(this::writeSettings);
         Runtime.getRuntime().addShutdownHook(myHook);
 
         loadImages();
@@ -130,12 +131,11 @@ public class Visualizer extends JButton {
     /// create all bits and filters  ///////////////////////////////////////////////////////////////////////////////////
     private void createAllPossibilities() {
 
-        numBits = 40;
-        boxWidth = 1500.0 / numBits;
-        if (boxWidth > 36) {
-            boxWidth = 36;
+        bitBoxWidth = 1500.0 / numberOfBits;
+        if (bitBoxWidth > 36) {
+            bitBoxWidth = 36;
         }
-        double x = boxWidth;
+        double x = bitBoxWidth;
         double y = offsetY;
 
         int[] pattern;
@@ -146,33 +146,33 @@ public class Visualizer extends JButton {
         allBitsAlice = new ArrayList<>();
         pattern = new int[]{0, 1, 0, 1, 0, 0, 1, 1, 0, 1, 0, 1, 0, 0, 0, 0, 1, 1, 1, 1};
         int i = 0;
-        gap = 0;
+        gapForDemo = 0;
         for (int bit : pattern) {
             double xPos = x * (i++) + offsetX;
             addGaps(i);
-            allBitsAlice.add(new Bit(bit, xPos + gap, y, x, x));
+            allBitsAlice.add(new Bit(bit, xPos + gapForDemo, y, x, x));
         }
 
         /// create Alice's schemes 'x | +' /////////////////////////////////////////////////////////////////////////////
         allSchemesAlice = new ArrayList<>();
         pattern = new int[]{0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1};
         i = 0;
-        gap = 0;
+        gapForDemo = 0;
         for (int filter : pattern) {
             double xPos = x * (i++) + offsetX;
             addGaps(i);
-            allSchemesAlice.add(new Scheme(filter, xPos + gap, 2 * offsetY, x, x));
+            allSchemesAlice.add(new Scheme(filter, xPos + gapForDemo, 2 * offsetY, x, x));
         }
 
         /// create Alice's polarizations '- \ / |' /////////////////////////////////////////////////////////////////////
         pattern = new int[]{0, 1, 2, 3, 0, 0, 1, 1, 0, 1, 2, 3, 0, 0, 2, 2, 1, 1, 3, 3};
         allPolarizationsAlice = new ArrayList<>();
         i = 0;
-        gap = 0;
+        gapForDemo = 0;
         for (int filter : pattern) {
             double xPos = x * (i++) + offsetX;
             addGaps(i);
-            allPolarizationsAlice.add(new Polarisation(filter, xPos + gap, 3 * offsetY, x, x));
+            allPolarizationsAlice.add(new Polarisation(filter, xPos + gapForDemo, 3 * offsetY, x, x));
         }
 
 /////// Eve ////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -181,11 +181,11 @@ public class Visualizer extends JButton {
         pattern = new int[]{-2, -2, -2, -2, -2, -2, -2, -2, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0};
         allSchemesEve = new ArrayList<>();
         i = 0;
-        gap = 0;
+        gapForDemo = 0;
         for (int scheme : pattern) {
             double xPos = x * (i++) + offsetX;
             addGaps(i);
-            Scheme s = new Scheme(scheme, xPos + gap, 4 * offsetY, x, x);
+            Scheme s = new Scheme(scheme, xPos + gapForDemo, 4 * offsetY, x, x);
             s.setValidity(scheme == s.filter);
             allSchemesEve.add(s);
         }
@@ -194,21 +194,21 @@ public class Visualizer extends JButton {
         allBitsEve = new ArrayList<>();
         pattern = new int[]{-2, -2, -2, -2, -2, -2, -2, -2, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1};
         i = 0;
-        gap = 0;
+        gapForDemo = 0;
         for (int filter : pattern) {
             double xPos = x * (i++) + offsetX;
             addGaps(i);
-            allBitsEve.add(new Bit(filter, xPos + gap, 5 * offsetY, x, x));
+            allBitsEve.add(new Bit(filter, xPos + gapForDemo, 5 * offsetY, x, x));
         }
         /// create Eve's polarizations /////////////////////////////////////////////////////////////////////////////////
         pattern = new int[]{-2, -2, -2, -2, -2, -2, -2, -2, 0, 1, 2, 3, -1, -1, -1, -1, -1, -1, -1, -1};
         allPolarizationsEve = new ArrayList<>();
         i = 0;
-        gap = 0;
+        gapForDemo = 0;
         for (int polarization : pattern) {
             double xPos = x * (i++) + offsetX;
             addGaps(i);
-            Polarisation t = new Polarisation(polarization, xPos + gap, 6 * offsetY, x, x);
+            Polarisation t = new Polarisation(polarization, xPos + gapForDemo, 6 * offsetY, x, x);
 //            t.set
             allPolarizationsEve.add(t);
         }
@@ -220,11 +220,11 @@ public class Visualizer extends JButton {
         allSchemesBob = new ArrayList<>();
         pattern = new int[]{0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1};
         i = 0;
-        gap = 0;
+        gapForDemo = 0;
         for (int filter : pattern) {
             double xPos = x * (i++) + offsetX;
             addGaps(i);
-            Scheme s = new Scheme(filter, xPos + gap, 7 * offsetY, x, x);
+            Scheme s = new Scheme(filter, xPos + gapForDemo, 7 * offsetY, x, x);
             s.setValidity(filter == s.filter);
             allSchemesBob.add(s);
         }
@@ -233,33 +233,35 @@ public class Visualizer extends JButton {
         allBitsBob = new ArrayList<>();
         pattern = new int[]{0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1};
         i = 0;
-        gap = 0;
+        gapForDemo = 0;
         for (int bit : pattern) {
             double xPos = x * (i++) + offsetX;
             addGaps(i);
-            allBitsBob.add(new Bit(bit, xPos + gap, 8 * offsetY, x, x));
+            allBitsBob.add(new Bit(bit, xPos + gapForDemo, 8 * offsetY, x, x));
         }
 
-        highlighter = new Rectangle2D.Double(offsetX, offsetY, x, offsetY * 7 + boxWidth);
+        numberOfBits = allBitsAlice.size();
 
-        toolTip = new Rectangle2D.Double(offsetX, boxWidth / 2.0, getWidth() - offsetX - boxWidth, boxWidth);
+        highlighter = new Rectangle2D.Double(offsetX, offsetY, x, offsetY * 7 + bitBoxWidth);
+
+        toolTip = new Rectangle2D.Double(offsetX, bitBoxWidth / 2.0, getWidth() - offsetX - bitBoxWidth, bitBoxWidth);
     }
 
     private void createAllRandom() {
 
         Random random = new Random();
-        boxWidth = 1500.0 / numBits;
-        if (boxWidth > 36) {
-            boxWidth = 36;
+        bitBoxWidth = 1500.0 / numberOfBits;
+        if (bitBoxWidth > 36) {
+            bitBoxWidth = 36;
         }
-        double x = boxWidth;
+        double x = bitBoxWidth;
         double y = offsetY;
 
-        highlighter = new Rectangle2D.Double(-100, offsetY, x, offsetY * 7 + boxWidth);
+        highlighter = new Rectangle2D.Double(offsetX, offsetY, x, offsetY * 7 + bitBoxWidth);
 
         /// create Alice's random bit-string ///////////////////////////////////////////////////////////////////////////
         allBitsAlice = new ArrayList<>();
-        for (int i = 0; i < numBits; i++) {
+        for (int i = 0; i < numberOfBits; i++) {
             int bit = random.nextInt(2);
             double xPos = x * i + offsetX;
             allBitsAlice.add(new Bit(bit, xPos, y, x, x));
@@ -267,14 +269,14 @@ public class Visualizer extends JButton {
 
         /// create Alice's random schemes //////////////////////////////////////////////////////////////////////////////
         allSchemesAlice = new ArrayList<>();
-        for (int i = 0; i < numBits; i++) {
+        for (int i = 0; i < numberOfBits; i++) {
             double xPos = x * i + offsetX;
             allSchemesAlice.add(new Scheme(random.nextInt(2), xPos, 2 * offsetY, x, x));
         }
 
         /// create Alice's polarizations ///////////////////////////////////////////////////////////////////////////////
         allPolarizationsAlice = new ArrayList<>();
-        for (int i = 0; i < numBits; i++) {
+        for (int i = 0; i < numberOfBits; i++) {
 
             double xPos = x * i + offsetX;
             int theCase = -1;
@@ -292,7 +294,7 @@ public class Visualizer extends JButton {
 
         /// create Eve's schemes ///////////////////////////////////////////////////////////////////////////////////////
         allSchemesEve = new ArrayList<>();
-        for (int i = 0; i < numBits; i++) {
+        for (int i = 0; i < numberOfBits; i++) {
             double xPos = x * i + offsetX;
             int r = random.nextInt(2);
             Scheme s = new Scheme(r, xPos, 4 * offsetY, x, x);
@@ -302,7 +304,7 @@ public class Visualizer extends JButton {
 
         /// create Eve's bit-string ////////////////////////////////////////////////////////////////////////////////////
         allBitsEve = new ArrayList<>();
-        for (int i = 0; i < numBits; i++) {
+        for (int i = 0; i < numberOfBits; i++) {
             int bit = -1;
             if (allSchemesEve.get(i).filter == allSchemesAlice.get(i).filter) {
                 bit = allBitsAlice.get(i).theBit;
@@ -313,7 +315,7 @@ public class Visualizer extends JButton {
 
         /// create Eve's polarizations /////////////////////////////////////////////////////////////////////////////////
         allPolarizationsEve = new ArrayList<>();
-        for (int i = 0; i < numBits; i++) {
+        for (int i = 0; i < numberOfBits; i++) {
 
             double xPos = x * i + offsetX;
             int theCase = -1;
@@ -331,7 +333,7 @@ public class Visualizer extends JButton {
 
         /// create Bob's schemes ///////////////////////////////////////////////////////////////////////////////////////
         allSchemesBob = new ArrayList<>();
-        for (int i = 0; i < numBits; i++) {
+        for (int i = 0; i < numberOfBits; i++) {
             double xPos = x * i + offsetX;
             int r = random.nextInt(2);
             Scheme s = new Scheme(r, xPos, 7 * offsetY, x, x);
@@ -341,7 +343,7 @@ public class Visualizer extends JButton {
 
         /// create Bob's bit-string ////////////////////////////////////////////////////////////////////////////////////
         allBitsBob = new ArrayList<>();
-        for (int i = 0; i < numBits; i++) {
+        for (int i = 0; i < numberOfBits; i++) {
             int bit = -1;
             if (allSchemesBob.get(i).filter == allSchemesAlice.get(i).filter) {
                 bit = allBitsAlice.get(i).theBit;
@@ -349,13 +351,15 @@ public class Visualizer extends JButton {
             double xPos = x * i + offsetX;
             allBitsBob.add(new Bit(bit, xPos, 8 * offsetY, x, x));
         }
+
+        toolTip = new Rectangle2D.Double(offsetX, bitBoxWidth / 2.0, getWidth() - offsetX - bitBoxWidth, bitBoxWidth);
     }
 
     private void addGaps(int i) {
 
         if (i == 3 || i == 5 || i == 7 || i == 9 || i == 11 || i == 13 || i == 17) {
             double gapSize = 12;
-            gap += gapSize;
+            gapForDemo += gapSize;
         }
     }
 
@@ -382,15 +386,19 @@ public class Visualizer extends JButton {
 
         drawNumberOfBits(g2d);
 
-        g2d.setFont(new Font("Arial", Font.PLAIN, (int) (boxWidth / 1.8)));
+        g2d.setFont(new Font("Arial", Font.PLAIN, (int) (bitBoxWidth / 1.8)));
 
         drawAliceBobEve(g2d);
 
-        drawHighlighter(g2d, true);
+        if (showHighLighter) {
+            drawHighlighter(g2d, true);
+        }
 
         drawPhotonStuff(g2d);
 
-        drawHighlighter(g2d, false);
+        if (showHighLighter) {
+            drawHighlighter(g2d, false);
+        }
 
         if (!demoMode) {
             drawHeaders(g2d);
@@ -401,7 +409,7 @@ public class Visualizer extends JButton {
 
         g2d.setColor(MyColors.myGray);
         g2d.setFont(new Font("Arial", Font.PLAIN, 12));
-        g2d.drawString("Number of bits: " + numBits, 10, 16);
+        g2d.drawString("Number of bits: " + numberOfBits, 10, 16);
     }
 
     private void drawAliceBobEve(Graphics2D g2d) {
@@ -428,17 +436,17 @@ public class Visualizer extends JButton {
             g2d.setColor(MyColors.myGreen);
             if (toolTipText.contains("Contradiction") ||
                     toolTipText.contains("'0' or a '1'") ||
-                    allBitsBob.get(highlighterPosition).theBit == -1) {
+                    allBitsBob.get(highlighterBitPosition).theBit == -1) {
                 g2d.setColor(MyColors.myRed);
                 textColor = MyColors.mySandLikeColor;
             }
             g2d.fill(highlighter);
-            if (demoMode) {
-                g2d.fill(toolTip);
-                g2d.setFont(new Font("Arial", Font.PLAIN, (int) (boxWidth / 2)));
-                g2d.setColor(textColor);
-                g2d.drawString(toolTipText, offsetX + 6, (int) (toolTip.y + boxWidth - 12));
-            }
+//            if (demoMode) {
+            g2d.fill(toolTip);
+            g2d.setFont(new Font("Arial", Font.PLAIN, (int) (bitBoxWidth / 2)));
+            g2d.setColor(textColor);
+            g2d.drawString(toolTipText, offsetX + 6, (int) (toolTip.y + bitBoxWidth - 12));
+//            }
         } else {
             g2d.setColor(MyColors.myLightGray);
             g2d.draw(highlighter);
@@ -500,7 +508,6 @@ public class Visualizer extends JButton {
             g2d.drawString("Polarizations: - " + str, offsetX, (int) (6 * offsetY - upShiftHeader));
         }
 
-
         str = getPercentSchemes(allSchemesBob);
         g2d.drawString("Bob's schemes: " + str, offsetX, (int) (7 * offsetY - upShiftHeader));
         str = getPercentBit(allBitsAlice);
@@ -559,9 +566,8 @@ public class Visualizer extends JButton {
         int percent2 = (count2 * 100) / list.size();
         int percent3 = (count3 * 100) / list.size();
         int percent_1 = (count_1 * 100) / list.size();
-        String str = percent0 + " % '|' and " + percent1 + " % '-' " + percent2 + " % '\\' " + percent3 + " % '/' " + percent_1 + " % '|-/\\' ";
 
-        return str;
+        return percent0 + " % '|' and " + percent1 + " % '-' " + percent2 + " % '\\' " + percent3 + " % '/' " + percent_1 + " % '|-/\\' ";
     }
 
     public String getPercentBit(ArrayList<Bit> list) {
@@ -609,21 +615,24 @@ public class Visualizer extends JButton {
 
         switch (e.getKeyCode()) {
 
+            case KeyEvent.VK_ESCAPE:
+                showHighLighter = false;
+                break;
             case KeyEvent.VK_SPACE:
                 creation();
                 break;
             case KeyEvent.VK_UP:
-                numBits += 2;
-                if (numBits > 256) {
-                    numBits = 256;
+                numberOfBits += 2;
+                if (numberOfBits > 256) {
+                    numberOfBits = 256;
                 } else {
                     creation();
                 }
                 break;
             case KeyEvent.VK_DOWN:
-                numBits -= 2;
-                if (numBits < 12) {
-                    numBits = 12;
+                numberOfBits -= 2;
+                if (numberOfBits < 12) {
+                    numberOfBits = 12;
                 } else {
                     creation();
                 }
@@ -639,7 +648,7 @@ public class Visualizer extends JButton {
 
             /// number keys ////////////////////////////////////////////////////////////////////////////////////////////
             case KeyEvent.VK_4:
-                numBits = 42;
+                numberOfBits = 42;
                 creation();
                 break;
 
@@ -657,18 +666,15 @@ public class Visualizer extends JButton {
                 break;
             case KeyEvent.VK_M:
                 if (e.isShiftDown()) {
-                    numBits = 256;
+                    numberOfBits = 256;
                 } else {
-                    numBits = 12;
+                    numberOfBits = 12;
                 }
                 creation();
                 break;
             case KeyEvent.VK_P:
                 break;
             case KeyEvent.VK_T:
-                break;
-            case KeyEvent.VK_ESCAPE:
-                highlighter.x = -100;
                 break;
             case KeyEvent.VK_W:
                 System.exit(0);
@@ -679,18 +685,18 @@ public class Visualizer extends JButton {
 
     private void handleLeftRight(int dir) {
 
-        highlighterPosition += dir;
+        highlighterBitPosition += dir;
 
-        if (highlighterPosition < 0) {
-            highlighterPosition = 0;
+        if (highlighterBitPosition < 0) {
+            highlighterBitPosition = 0;
         }
-        if (highlighterPosition >= allBitsAlice.size()) {
-            highlighterPosition = allBitsAlice.size() - 1;
+        if (highlighterBitPosition >= allBitsAlice.size()) {
+            highlighterBitPosition = allBitsAlice.size() - 1;
         }
 
-        highlighter.x = allBitsAlice.get(highlighterPosition).x;
+        highlighter.x = allBitsAlice.get(highlighterBitPosition).x;
         if (demoMode) {
-            toolTipText = explanations.getLine(highlighterPosition);
+            toolTipText = explanations.getLine(highlighterBitPosition);
         }
 
     }
@@ -699,13 +705,14 @@ public class Visualizer extends JButton {
 
         int i = 0;
         for (MyBox b : allBitsAlice) {
-            Rectangle2D.Double rect = new Rectangle2D.Double(b.x, 0, boxWidth, getHeight());
+            Rectangle2D.Double rect = new Rectangle2D.Double(b.x, 0, bitBoxWidth, getHeight());
             if (demoMode) {
                 toolTipText = explanations.getLine(i);
             }
             if (rect.contains(e.getX(), e.getY())) {
+                showHighLighter = true;
                 highlighter.x = b.x;
-                highlighterPosition = i;
+                highlighterBitPosition = i;
                 break;
             }
             i++;

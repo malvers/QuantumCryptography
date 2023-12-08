@@ -13,6 +13,8 @@ public class Bit extends MyBox {
 
     protected void draw(Graphics2D g2d) {
 
+        g2d.setFont(new Font("Arial", Font.PLAIN, (int) (height / 1.8)));
+
         if (theBit != -2) {
             g2d.setColor(MyColors.myLightGray);
             g2d.draw(this);
